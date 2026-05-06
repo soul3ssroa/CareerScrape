@@ -16,6 +16,12 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv(BASE_DIR / '.env')
+except ImportError:
+    pass
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -174,6 +180,22 @@ WORKDAY_SITES = [
     {
         'company': 'Applied Materials',
         'url': 'https://amat.wd1.myworkdayjobs.com/External',
+    },
+    {
+        'company': 'Auto-Owners Insurance',
+        'url': 'https://aoins.wd5.myworkdayjobs.com/AutoOwners',
+    },
+    {
+        'company': 'Abbott',
+        'url': 'https://abbott.wd5.myworkdayjobs.com/en-US/abbottcareers',
+    },
+    {
+        'company': 'Booz Allen',
+        'url': 'https://bah.wd1.myworkdayjobs.com/en-US/BAH_Jobs?redirect=/en-US/BAH_Jobs/userHome',
+    },
+    {
+        'company': 'GPC',
+        'url': 'https://genpt.wd1.myworkdayjobs.com/en-US/Careers',
     }
 ]
 

@@ -20,16 +20,22 @@ class Command(BaseCommand):
             default=3600,
             help='Seconds to wait between continuous scrape runs. Defaults to 3600.',
         )
+        parser.add_argument(
+            '--location',
+            default=None,
+            help='Only save jobs whose location contains this text, case-insensitive.',
+        )
 
     def handle(self, *args, **options):
         interval = options['interval']
+        location = options['location']
         if interval < 60:
             raise ValueError('The scrape interval must be at least 60 seconds.')
 
         while True:
             started_at = time.strftime('%Y-%m-%d %H:%M:%S')
             self.stdout.write(f'Starting job scrape at {started_at}.')
-            scrape_all_sites()
+            scrape_all_sites(location_filter=location)
             self.stdout.write(self.style.SUCCESS('Job scrape completed.'))
 
             if not options['continuous']:

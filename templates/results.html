@@ -56,21 +56,17 @@
 
     <button><a href="{% url 'home' %}">Back to Home</a></button>
 
-           <div style="padding-left: 150px; margin-top: 20px;">
-            <form method="post" action="{% url 'search' %}">
-                {% csrf_token %}
-                <input type="text" name="query" value="{{ query }}" placeholder="Search for job..." style="padding: 8px 12px; width: 300px; border: 1px solid var(--text-color); border-radius: 4px; background-color: var(--bg-color); color: var(--text-color);" />
-                <select name="location" aria-label="Location filter" style="margin-left: 8px; padding: 8px 12px; width: 220px; border: 1px solid var(--text-color); border-radius: 4px; background-color: var(--bg-color); color: var(--text-color);">
-                    {% for value, label in location_options %}
-                        <option value="{{ value }}" {% if value == selected_location %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
-                <button type="submit" style="margin-left: 8px; padding: 8px 16px; cursor: pointer; background: var(--text-color); color: var(--bg-color); border: none; border-radius: 4px;">Search</button>
-            </form>
-        </div>
-    
+    <div style="padding-left: 150px; margin-top: 20px;">
+        <form method="post" action="{% url 'search' %}">
+            {% csrf_token %}
+            <input type="text" name="query" value="{{ query }}" placeholder="Search for job..." style="padding: 8px 12px; width: 300px; border: 1px solid var(--text-color); border-radius: 4px; background-color: var(--bg-color); color: var(--text-color);" />
+            <input type="text" name="location" value="{{ location_filter }}" placeholder="Location (e.g. United States, TX, Remote)" style="margin-left: 8px; padding: 8px 12px; width: 280px; border: 1px solid var(--text-color); border-radius: 4px; background-color: var(--bg-color); color: var(--text-color);" />
+            <button type="submit" style="margin-left: 8px; padding: 8px 16px; cursor: pointer; background: var(--text-color); color: var(--bg-color); border: none; border-radius: 4px;">Search</button>
+        </form>
+    </div>
+
     <header>
-        <h1 style="font-size: 64px; text-align: center;">Search Results for "{{ query }}"{% if selected_location_label %} in {{ selected_location_label }}{% endif %}</h1>
+        <h1 style="font-size: 64px; text-align: center;">Search Results for "{{ query }}"{% if location_filter %} in {{ location_filter }}{% endif %}</h1>
     </header>
 
     <main>
@@ -85,9 +81,9 @@
                         <p>Posting date: Not listed</p>
                     {% endif %}
                     {% if job.location_posting %}
-                        <p>Location posting: {{ job.location_posting }}</p>
+                        <p>Location: {{ job.location_posting }}</p>
                     {% else %}
-                        <p>Location posting: Not listed</p>
+                        <p>Location: Not listed</p>
                     {% endif %}
                 </div>
             {% endfor %}
@@ -97,8 +93,7 @@
     </main>
 
     <script>
-        // Check for saved preference, otherwise use system preference
-        const savedTheme = localStorage.getItem('theme') || 
+        const savedTheme = localStorage.getItem('theme') ||
             (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
         document.documentElement.setAttribute('data-theme', savedTheme);
 

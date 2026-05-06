@@ -1,0 +1,27 @@
+Command to remove any job posting without a posting date
+
+    python manage.py cleanup_jobs --missing-date
+
+Command to remove any job posting older than 2 weeks
+
+    python manage.py cleanup_jobs --older-than-days 14
+
+Command to remove jobs from certain locations
+
+    python manage.py cleanup_jobs --location "United States"
+
+Command to scrape jobs
+
+    Python manage.py scrape_jobs
+
+Command to migrate database
+
+    .\.venv\Scripts\python.exe manage.py migrate               
+
+Command to remove duplicate job postings
+
+    python manage.py cleanup_jobs --duplicates
+
+Command to clear the database
+
+    docker exec scorched-search-db-1 psql -U postgres -d scorched_search -c "TRUNCATE TABLE jobs_job RESTART IDENTITY;"
