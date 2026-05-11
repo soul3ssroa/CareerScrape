@@ -190,12 +190,80 @@ WORKDAY_SITES = [
         'url': 'https://abbott.wd5.myworkdayjobs.com/en-US/abbottcareers',
     },
     {
-        'company': 'Booz Allen',
-        'url': 'https://bah.wd1.myworkdayjobs.com/en-US/BAH_Jobs?redirect=/en-US/BAH_Jobs/userHome',
-    },
-    {
         'company': 'GPC',
         'url': 'https://genpt.wd1.myworkdayjobs.com/en-US/Careers',
+    },
+    {
+        'company': 'Abbott',
+        'url': 'https://abbott.wd5.myworkdayjobs.com/en-US/abbottcareers'
+    },
+    {
+        'company': 'Mastercard',
+        'url': 'https://mastercard.wd1.myworkdayjobs.com/en-US/CorporateCareers?redirect=/en-US/CorporateCareers/userHome'
+    },
+    {
+        'company': 'SNC',
+        'url': 'https://snc.wd1.myworkdayjobs.com/en-US/SNC_External_Career_Site'
+    },
+    {
+        'company': 'Logitech',
+        'url': 'https://logitech.wd5.myworkdayjobs.com/en-US/Logitech/jobs'
+    },
+    {
+        'company': 'Grubhub',
+        'url' : 'https://wonder.wd1.myworkdayjobs.com/en-US/Grubhub_Careers'
+    }
+    
+    
+]
+
+JOBVITE_SITES = [
+    {
+        'company': 'Tyler Tech',
+        'url' : 'https://jobs.jobvite.com/tylertech/jobs'
+    },
+    {
+        'company': 'Gigamon',
+        'url': 'https://jobs.jobvite.com/gigamon/job'
+    }
+]
+
+GREENHOUSE_SITES = [
+    {
+        'company': 'Loop',
+        'url': 'https://job-boards.greenhouse.io/loop'
+    },
+    {
+        'company': 'Underdog',
+        'url': 'https://job-boards.greenhouse.io/underdogfantasy'
+    },
+    {
+        'company': 'Oklo',
+        'url': 'https://job-boards.greenhouse.io/oklo'
+    },
+    {
+        'company': 'Verkada',
+        'url': 'https://job-boards.greenhouse.io/verkada'
+    },
+    {
+        'company': 'Scale AI',
+        'url': 'https://job-boards.greenhouse.io/scaleAI'
+    },
+    {
+        'company': 'Samsara',
+        'url': 'https://job-boards.greenhouse.io/samsara'
+    },
+    {
+        'company': 'Discord',
+        'url': 'https://job-boards.greenhouse.io/discord'
+    },
+    {
+        'company': 'Nuro',
+        'url': 'https://job-boards.greenhouse.io/nuro'
+    },
+    {
+        'company': 'Figma',
+        'url': 'https://job-boards.greenhouse.io/figma'
     }
 ]
 

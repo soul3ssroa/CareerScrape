@@ -61,6 +61,19 @@
             {% csrf_token %}
             <input type="text" name="query" value="{{ query }}" placeholder="Search for job..." style="padding: 8px 12px; width: 300px; border: 1px solid var(--text-color); border-radius: 4px; background-color: var(--bg-color); color: var(--text-color);" />
             <input type="text" name="location" value="{{ location_filter }}" placeholder="Location (e.g. United States, TX, Remote)" style="margin-left: 8px; padding: 8px 12px; width: 280px; border: 1px solid var(--text-color); border-radius: 4px; background-color: var(--bg-color); color: var(--text-color);" />
+            <select name="company" style="margin-left: 8px; padding: 8px 12px; border: 1px solid var(--text-color); border-radius: 4px; background-color: var(--bg-color); color: var(--text-color);">
+                <option value="">All Companies</option>
+                {% for company in companies %}
+                    <option value="{{ company }}" {% if company == company_filter %}selected{% endif %}>{{ company }}</option>
+                {% endfor %}
+            </select>
+            <select name="date_posted" style="margin-left: 8px; padding: 8px 12px; border: 1px solid var(--text-color); border-radius: 4px; background-color: var(--bg-color); color: var(--text-color);">
+                    <option value="">All Time</option>
+                    <option value="today" {% if date_posted == "today" %}selected{% endif %}>Today</option>
+                    <option value="week" {% if date_posted == "week" %}selected{% endif %}>This Week</option>
+                    <option value="month" {% if date_posted == "month" %}selected{% endif %}>This Month</option>
+                    <option value="not listed" {% if date_posted == "not listed" %}selected{% endif %}>Not Listed</option>
+                </select>
             <button type="submit" style="margin-left: 8px; padding: 8px 16px; cursor: pointer; background: var(--text-color); color: var(--bg-color); border: none; border-radius: 4px;">Search</button>
         </form>
     </div>

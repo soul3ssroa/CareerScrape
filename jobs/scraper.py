@@ -15,6 +15,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from webdriver_manager.chrome import ChromeDriverManager
 
+from bs4 import BeautifulSoup
+
 from .models import Job
 from .utils import get_location_from_workday_url, location_matches_filter, parse_posted_date
 
@@ -24,57 +26,9 @@ FILTERED_JOBS_PER_SITE = 40
 MAX_LISTING_LOAD_ATTEMPTS = 30
 API_PAGE_SIZE = 20
 API_MAX_PAGES = 500
-US_STATE_CODES = {
-    'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID',
-    'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS',
-    'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK',
-    'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV',
-    'WI', 'WY', 'DC',
-}
-US_STATE_NAMES = {
-    'alabama', 'alaska', 'arizona', 'arkansas', 'california', 'colorado',
-    'connecticut', 'delaware', 'florida', 'georgia', 'hawaii', 'idaho',
-    'illinois', 'indiana', 'iowa', 'kansas', 'kentucky', 'louisiana',
-    'maine', 'maryland', 'massachusetts', 'michigan', 'minnesota',
-    'mississippi', 'missouri', 'montana', 'nebraska', 'nevada',
-    'new hampshire', 'new jersey', 'new mexico', 'new york',
-    'north carolina', 'north dakota', 'ohio', 'oklahoma', 'oregon',
-    'pennsylvania', 'rhode island', 'south carolina', 'south dakota',
-    'tennessee', 'texas', 'utah', 'vermont', 'virginia', 'washington',
-    'west virginia', 'wisconsin', 'wyoming', 'district of columbia',
-}
-US_FILTER_TERMS = {'us', 'usa', 'u s', 'u s a', 'united states', 'united states of america', 'america'}
-
-
-def _normalize_text(text):
-    return re.sub(r'[^a-z0-9]+', ' ', text or '').lower().strip()
-
-
-def _is_us_filter(location_filter):
-    return _normalize_text(location_filter) in US_FILTER_TERMS
-
-
-def _obvious_us_location(location):
-    normalized_location = _normalize_text(location)
-    normalized_text = f' {normalized_location} '
-    upper_tokens = {
-        token.upper()
-        for token in re.findall(r'[A-Za-z0-9]+', location or '')
-    }
-    if upper_tokens & ({'US', 'USA'} | US_STATE_CODES):
-        return True
-    if any(f' {term} ' in normalized_text for term in US_FILTER_TERMS):
-        return True
-    if any(f' {state_name} ' in normalized_text for state_name in US_STATE_NAMES):
-        return True
-    return False
 
 
 def _job_matches_location(location, location_filter):
-    if not location_filter:
-        return True
-    if _is_us_filter(location_filter) and _obvious_us_location(location):
-        return True
     return location_matches_filter(location, location_filter)
 
 
@@ -165,7 +119,7 @@ def _location_from_api(data):
 
 def _description_from_api(data):
     value = _first_value(data, ('jobDescription', 'description', 'jobDescriptionText'))
-    return _text_value(value)[:2000]
+    return _text_value(value)[:100000]
 
 
 def _title_from_api(data):
@@ -470,24 +424,171 @@ def _load_more_job_links(driver, current_count):
     return len(_find_job_link_elements(driver)) > current_count
 
 
-def scrape_all_sites(location_filter=None):
-    sites = getattr(settings, 'WORKDAY_SITES', [])
-    if not sites:
-        print('No WORKDAY_SITES configured in settings.')
-        return
+def _fetch_html(url):
+    req = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+    with urlopen(req, timeout=30) as resp:
+        return resp.read().decode('utf-8', errors='replace')
+
+
+def _save_job_source(job_data, source):
+    existing = Job.objects.filter(url=job_data['url']).first()
+    posted_date = job_data['posted_date']
+    if not posted_date and existing:
+        posted_date = existing.posted_date
+    job, _ = Job.objects.update_or_create(
+        url=job_data['url'],
+        defaults={
+            'title': job_data['title'],
+            'company': job_data['company'],
+            'location': job_data['location'],
+            'posted_date': posted_date,
+            'description': job_data['description'],
+            'source': source,
+        },
+    )
+    print(f"Saved job: {job.title} ({job.company})")
+    return job.url
+
+
+def _jobvite_base_url(site_url):
+    """Return the base jobs listing URL, normalising /job/ paths to /jobs."""
+    parsed = urlparse(site_url)
+    # e.g. /tylertech/job  ->  /tylertech/jobs
+    path = re.sub(r'/job(/.*)?$', '/jobs', parsed.path)
+    return f'{parsed.scheme}://{parsed.netloc}{path}'
+
+
+def scrape_jobvite_site(site, location_filter=None):
+    company = site.get('company', 'Jobvite')
+    site_url = site.get('url')
+    listing_url = _jobvite_base_url(site_url)
+    parsed = urlparse(listing_url)
+    url_base = f'{parsed.scheme}://{parsed.netloc}'
+
+    print(f'Scraping Jobvite: {company} ({listing_url})')
+    try:
+        html = _fetch_html(listing_url)
+    except (HTTPError, URLError, TimeoutError) as exc:
+        print(f'Jobvite fetch failed for {company}: {exc}')
+        return []
+
+    soup = BeautifulSoup(html, 'html.parser')
+    saved_urls = []
+
+    # Each job is a <tr> inside a <table class="jv-job-list">
+    for row in soup.select('table.jv-job-list tr'):
+        title_el = row.select_one('td.jv-job-list-name a')
+        if not title_el:
+            continue
+
+        title = title_el.get_text(strip=True)
+        href = title_el.get('href', '')
+        job_url = href if href.startswith('http') else url_base + href
+
+        loc_el = row.select_one('td.jv-job-list-location')
+        location = ' '.join(loc_el.get_text().split()) if loc_el else ''
+
+        # Fetch detail page for description (and richer location if listing says "N Locations")
+        description = ''
+        posted_date = None
+        try:
+            detail_html = _fetch_html(job_url)
+            detail_soup = BeautifulSoup(detail_html, 'html.parser')
+            # Extract datePosted from JSON-LD if present
+            ld_tag = detail_soup.find('script', type='application/ld+json')
+            if ld_tag:
+                try:
+                    ld = json.loads(ld_tag.string or '')
+                    posted_date = parse_posted_date(ld.get('datePosted', ''))
+                except (json.JSONDecodeError, AttributeError):
+                    pass
+            meta_el = detail_soup.select_one('p.jv-job-detail-meta')
+            if meta_el and (not location or 'location' in location.lower()):
+                for br in meta_el.find_all('br'):
+                    br.decompose()
+                location = ' '.join(meta_el.get_text().split()).split('Salary:')[0].strip()
+            desc_el = detail_soup.select_one('div.jv-job-detail-description')
+            description = desc_el.get_text(' ', strip=True)[:100000] if desc_el else ''
+        except Exception as exc:
+            print(f'Jobvite detail fetch failed for {job_url}: {exc}')
+
+        if not _job_matches_location(location, location_filter):
+            print(f"Skipped '{location_filter}' filter: {title} ({location or 'No location'})")
+            continue
+
+        saved_urls.append(_save_job_source({
+            'title': title or 'Unknown Title',
+            'url': job_url,
+            'location': location,
+            'posted_date': posted_date,
+            'description': description,
+            'company': company,
+        }, 'jobvite'))
+
+    print(f'{company}: saved {len(saved_urls)} jobs.')
+    return saved_urls
+
+
+def scrape_greenhouse_site(site, location_filter=None):
+    company = site.get('company', 'Greenhouse')
+    site_url = site.get('url')
+    # Greenhouse exposes a JSON API at the same path
+    parsed = urlparse(site_url)
+    board_token = parsed.path.strip('/').split('/')[-1]
+    api_url = f'https://boards-api.greenhouse.io/v1/boards/{board_token}/jobs?content=true'
+    print(f'Scraping Greenhouse: {company} ({api_url})')
+    try:
+        data = _api_json(api_url)
+    except (HTTPError, URLError, TimeoutError, json.JSONDecodeError) as exc:
+        print(f'Greenhouse API failed for {company}: {exc}')
+        return []
+
+    saved_urls = []
+    for job in data.get('jobs', []):
+        title = job.get('title', 'Unknown Title')
+        job_url = job.get('absolute_url', '')
+        if not job_url:
+            continue
+
+        location = (job.get('location') or {}).get('name', '')
+        posted_date = parse_posted_date(job.get('first_published', '') or job.get('updated_at', ''))
+
+        content = job.get('content', '')
+        description = re.sub(r'<[^>]+>', ' ', content).strip()[:100000] if content else ''
+
+        if not _job_matches_location(location, location_filter):
+            print(f"Skipped '{location_filter}' filter: {title} ({location or 'No location'})")
+            continue
+
+        saved_urls.append(_save_job_source({
+            'title': title,
+            'url': job_url,
+            'location': location,
+            'posted_date': posted_date,
+            'description': description,
+            'company': company,
+        }, 'greenhouse'))
+
+    print(f'{company}: saved {len(saved_urls)} jobs.')
+    return saved_urls
+
+
+def scrape_all_sites(location_filter=None, source=None):
+    workday_sites = getattr(settings, 'WORKDAY_SITES', []) if source in (None, 'workday') else []
+    jobvite_sites = getattr(settings, 'JOBVITE_SITES', []) if source in (None, 'jobvite') else []
+    greenhouse_sites = getattr(settings, 'GREENHOUSE_SITES', []) if source in (None, 'greenhouse') else []
 
     seen_urls = []
     failed_sites = []
     selenium_driver = None
 
     try:
-        for site in sites:
+        for site in workday_sites:
             site_urls = scrape_workday_site_api(site, location_filter=location_filter)
             if site_urls is None:
                 if selenium_driver is None:
                     selenium_driver = _build_chrome_driver()
                 site_urls = scrape_workday_site(selenium_driver, site, location_filter=location_filter)
-
             if site_urls:
                 seen_urls.extend(site_urls)
             else:
@@ -496,12 +597,20 @@ def scrape_all_sites(location_filter=None):
         if selenium_driver is not None:
             selenium_driver.quit()
 
+    for site in jobvite_sites:
+        site_urls = scrape_jobvite_site(site, location_filter=location_filter)
+        seen_urls.extend(site_urls or [])
+
+    for site in greenhouse_sites:
+        site_urls = scrape_greenhouse_site(site, location_filter=location_filter)
+        seen_urls.extend(site_urls or [])
+
     if location_filter:
         print('Skipping stale job cleanup because a location filter was used.')
     elif failed_sites:
         print(f"Skipping stale job cleanup because these sites had no results: {', '.join(failed_sites)}")
     elif seen_urls:
-        Job.objects.filter(source='workday').exclude(url__in=seen_urls).delete()
+        Job.objects.exclude(url__in=seen_urls).delete()
 
 
 def scrape_workday_site(driver, site, location_filter=None):
@@ -588,7 +697,7 @@ def scrape_workday_site(driver, site, location_filter=None):
             WebDriverWait(driver, 15).until(
                 lambda d: len(d.find_element(By.TAG_NAME, 'body').text) > 100
             )
-            description = driver.find_element(By.TAG_NAME, 'body').text[:2000]
+            description = driver.find_element(By.TAG_NAME, 'body').text[:20000]
             if not posted_date:
                 posted_date = find_posted_date(driver)
             if not job_data['location']:

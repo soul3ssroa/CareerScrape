@@ -1,7 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 
-from jobs.cleanup import delete_duplicate_jobs, delete_invalid_url_jobs, delete_jobs_older_than, delete_jobs_without_posted_date
-from jobs.models import Job
+from jobs.cleanup import delete_duplicate_jobs, delete_invalid_url_jobs, delete_jobs_from_company, delete_jobs_older_than, delete_jobs_without_posted_date
 
 
 class Command(BaseCommand):
@@ -52,7 +51,7 @@ class Command(BaseCommand):
         total_deleted = 0
 
         if company:
-            deleted_count, _ = Job.objects.filter(company__iexact=company).delete()
+            deleted_count = delete_jobs_from_company(company)
             total_deleted += deleted_count
             self.stdout.write(f'Deleted {deleted_count} jobs from "{company}".')
 

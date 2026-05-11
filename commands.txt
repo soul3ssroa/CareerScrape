@@ -25,3 +25,9 @@ Command to remove duplicate job postings
 Command to clear the database
 
     docker exec scorched-search-db-1 psql -U postgres -d scorched_search -c "TRUNCATE TABLE jobs_job RESTART IDENTITY;"
+
+Command to scrape jobs from a specific source
+
+    python manage.py scrape_jobs --source workday
+    python manage.py scrape_jobs --source jobvite
+    python manage.py scrape_jobs --source greenhouse

@@ -43,3 +43,8 @@ def delete_jobs_older_than(days=14):
     cutoff_date = timezone.localdate() - timedelta(days=days)
     deleted_count, _ = Job.objects.filter(posted_date__lt=cutoff_date).delete()
     return deleted_count
+
+
+def delete_jobs_from_company(company):
+    deleted_count, _ = Job.objects.filter(company__iexact=company).delete()
+    return deleted_count

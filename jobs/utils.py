@@ -72,7 +72,7 @@ COUNTRY_INDICATORS = {
 
 
 def normalize_location_text(location):
-    return re.sub(r'[^a-z0-9]+', ' ', location or '').lower().strip()
+    return re.sub(r'[^a-z0-9]+', ' ', (location or '').lower()).strip()
 
 
 def _get_country_keys(location):
@@ -107,22 +107,105 @@ def _get_country_keys(location):
     return matched
 
 
+US_STATE_NAMES = {
+    'alabama', 'alaska', 'arizona', 'arkansas', 'california', 'colorado',
+    'connecticut', 'delaware', 'florida', 'georgia', 'hawaii', 'idaho',
+    'illinois', 'indiana', 'iowa', 'kansas', 'kentucky', 'louisiana',
+    'maine', 'maryland', 'massachusetts', 'michigan', 'minnesota',
+    'mississippi', 'missouri', 'montana', 'nebraska', 'nevada',
+    'new hampshire', 'new jersey', 'new mexico', 'new york',
+    'north carolina', 'north dakota', 'ohio', 'oklahoma', 'oregon',
+    'pennsylvania', 'rhode island', 'south carolina', 'south dakota',
+    'tennessee', 'texas', 'utah', 'vermont', 'virginia', 'washington',
+    'west virginia', 'wisconsin', 'wyoming', 'district of columbia',
+}
+
+# Maps every alias (normalised lowercase) -> canonical country key
+_COUNTRY_ALIASES: dict[str, str] = {}
+for _key, _ind in COUNTRY_INDICATORS.items():
+    _COUNTRY_ALIASES[normalize_location_text(_key)] = _key
+    for _tok in _ind['tokens']:
+        _COUNTRY_ALIASES[_tok.lower()] = _key
+    for _phrase in _ind['phrases']:
+        _COUNTRY_ALIASES[normalize_location_text(_phrase)] = _key
+
+
+def _resolve_filter(location_filter: str):
+    """
+    Return (kind, value) where kind is:
+      'country'  -> value is a canonical country key (e.g. 'united states')
+      'state'    -> value is a normalised US state name (e.g. 'michigan')
+      'state_code' -> value is an uppercase US state abbreviation (e.g. 'MI')
+      'raw'      -> value is the normalised filter string for substring fallback
+    """
+    nf = normalize_location_text(location_filter)
+    upper = location_filter.strip().upper()
+    us_state_codes = COUNTRY_INDICATORS['united states']['state_codes']
+
+    # US state name takes priority over country alias (michigan is in US phrases but
+    # should filter to that state specifically, not all of the US)
+    if nf in US_STATE_NAMES:
+        return ('state', nf)
+    # US state abbreviation typed alone (e.g. 'MI', 'TX')
+    if upper in us_state_codes:
+        return ('state_code', upper)
+    # Direct alias lookup covers 'us', 'usa', 'united states', 'uk', 'gb', 'germany', etc.
+    if nf in _COUNTRY_ALIASES:
+        return ('country', _COUNTRY_ALIASES[nf])
+    if upper in _COUNTRY_ALIASES:
+        return ('country', _COUNTRY_ALIASES[upper])
+    return ('raw', nf)
+
+
+def _location_contains_any_us_indicator(location):
+    normalized = normalize_location_text(location)
+    padded = f' {normalized} '
+    upper_tokens = {t.upper() for t in re.findall(r'[A-Za-z0-9]+', location or '')}
+    us_ind = COUNTRY_INDICATORS['united states']
+    if upper_tokens & (us_ind['tokens'] | us_ind['state_codes']):
+        return True
+    for phrase in us_ind['phrases']:
+        if f' {phrase} ' in padded:
+            return True
+    return False
+
+
+def _is_us_broad_filter(normalized_filter):
+    return _COUNTRY_ALIASES.get(normalized_filter) == 'united states'
+
+
+def _is_us_state_filter(normalized_filter):
+    return normalized_filter in US_STATE_NAMES
+
+
 def location_matches_filter(location, location_filter):
     if not location_filter:
         return True
     if not location:
         return False
 
+    kind, value = _resolve_filter(location_filter)
+
+    if kind == 'country':
+        if value == 'united states':
+            return _location_contains_any_us_indicator(location)
+        return value in _get_country_keys(location)
+
+    if kind == 'state':
+        padded = f' {normalize_location_text(location)} '
+        return f' {value} ' in padded
+
+    if kind == 'state_code':
+        # Match the abbreviation as a non-leading token in the location string
+        tokens = [t.upper() for t in re.findall(r'[A-Za-z0-9]+', location)]
+        return value in tokens[1:] if len(tokens) > 1 else False
+
+    # 'raw' fallback: check country keys first, then substring
     filter_keys = _get_country_keys(location_filter)
     location_keys = _get_country_keys(location)
-
     if filter_keys and location_keys:
         return bool(filter_keys & location_keys)
-
-    # Fallback: plain substring match
-    normalized_location = normalize_location_text(location)
-    normalized_filter = normalize_location_text(location_filter)
-    return f' {normalized_filter} ' in f' {normalized_location} '
+    return f' {value} ' in f' {normalize_location_text(location)} '
 
 
 def get_location_from_workday_url(url):

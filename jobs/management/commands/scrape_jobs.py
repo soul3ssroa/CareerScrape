@@ -25,17 +25,24 @@ class Command(BaseCommand):
             default=None,
             help='Only save jobs whose location contains this text, case-insensitive.',
         )
+        parser.add_argument(
+            '--source',
+            default=None,
+            choices=['workday', 'jobvite', 'greenhouse'],
+            help='Only scrape from this platform. Omit to scrape all.',
+        )
 
     def handle(self, *args, **options):
         interval = options['interval']
         location = options['location']
+        source = options['source']
         if interval < 60:
             raise ValueError('The scrape interval must be at least 60 seconds.')
 
         while True:
             started_at = time.strftime('%Y-%m-%d %H:%M:%S')
             self.stdout.write(f'Starting job scrape at {started_at}.')
-            scrape_all_sites(location_filter=location)
+            scrape_all_sites(location_filter=location, source=source)
             self.stdout.write(self.style.SUCCESS('Job scrape completed.'))
 
             if not options['continuous']:
