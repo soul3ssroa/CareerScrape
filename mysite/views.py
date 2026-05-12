@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.db.models import Q
 from django.conf import settings
+from django.core.paginator import Paginator
 from datetime import date, timedelta
 
 from jobs.models import Job
@@ -20,7 +21,8 @@ def job_matches_location_filter(job, location_filter):
 
 def job_matches_date_filter(job, date_posted, today):
     if not date_posted:
-        return True
+        d = job.posted_date or parse_posted_date(job.description)
+        return d is not None
     d = job.posted_date or parse_posted_date(job.description)
     if date_posted == 'not listed':
         return d is None
@@ -65,48 +67,52 @@ def home(request):
 
 def search_jobs(request):
     if request.method == 'POST':
-        query = request.POST.get('query', '').strip()
-        location_filter = request.POST.get('location', '').strip()
-        company_filter = request.POST.get('company', '').strip()
-        date_posted = request.POST.get('date_posted', '').strip()
+        params = request.POST
+    elif request.GET.get('query'):
+        params = request.GET
+    else:
+        return redirect('home')
 
-        if not query:
-            return render(request, 'index.html', {
-                'error': 'Please enter a job title.',
-                'location_filter': location_filter,
-                'company_filter': company_filter,
-                'date_posted': date_posted,
-                'companies': _all_companies(),
-            })
+    query = params.get('query', '').strip()
+    location_filter = params.get('location', '').strip()
+    company_filter = params.get('company', '').strip()
+    date_posted = params.get('date_posted', '').strip()
 
-        words = query.split()
-        q_filter = Q(title__icontains=query) | Q(description__icontains=query)
-        for word in words:
-            q_filter &= (Q(title__icontains=word) | Q(description__icontains=word))
-        if company_filter:
-            q_filter &= Q(company__iexact=company_filter)
-
-        jobs = Job.objects.filter(q_filter).order_by('-posted_date', '-last_seen')
-
-        needs_python_filter = bool(location_filter or date_posted)
-        if needs_python_filter:
-            today = date.today()
-            jobs = [
-                job for job in jobs.iterator()
-                if job_matches_location_filter(job, location_filter)
-                and job_matches_date_filter(job, date_posted, today)
-            ][:100]
-        else:
-            jobs = list(jobs[:100])
-
-        jobs = add_job_display_fields(jobs)
-
-        return render(request, 'results.html', {
-            'jobs': jobs,
-            'query': query,
+    if not query:
+        return render(request, 'index.html', {
+            'error': 'Please enter a job title.',
             'location_filter': location_filter,
             'company_filter': company_filter,
             'date_posted': date_posted,
             'companies': _all_companies(),
         })
-    return redirect('home')
+
+    words = query.split()
+    q_filter = Q(title__icontains=query) | Q(description__icontains=query)
+    for word in words:
+        q_filter &= (Q(title__icontains=word) | Q(description__icontains=word))
+    if company_filter:
+        q_filter &= Q(company__iexact=company_filter)
+
+    jobs = Job.objects.filter(q_filter).order_by('-posted_date', '-last_seen')
+
+    today = date.today()
+    all_jobs = [
+        job for job in jobs.iterator()
+        if job_matches_location_filter(job, location_filter)
+        and job_matches_date_filter(job, date_posted, today)
+    ]
+
+    paginator = Paginator(all_jobs, 30)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+    add_job_display_fields(page_obj.object_list)
+
+    return render(request, 'results.html', {
+        'page_obj': page_obj,
+        'query': query,
+        'location_filter': location_filter,
+        'company_filter': company_filter,
+        'date_posted': date_posted,
+        'companies': _all_companies(),
+    })

@@ -24,8 +24,14 @@ def delete_invalid_url_jobs():
 def delete_duplicate_jobs():
     seen = set()
     duplicate_ids = []
-    for job in Job.objects.order_by('title', 'company', 'id').values('id', 'title', 'company'):
-        key = (job['title'].strip().lower(), job['company'].strip().lower())
+    for job in Job.objects.order_by('title', 'company', 'id').values('id', 'title', 'company', 'location', 'description', 'posted_date'):
+        key = (
+            job['title'].strip().lower(),
+            job['company'].strip().lower(),
+            (job['location'] or '').strip().lower(),
+            (job['description'] or '').strip().lower(),
+            job['posted_date'],
+        )
         if key in seen:
             duplicate_ids.append(job['id'])
         else:

@@ -83,8 +83,8 @@
     </header>
 
     <main>
-        {% if jobs %}
-            {% for job in jobs %}
+        {% if page_obj %}
+            {% for job in page_obj %}
                 <div class="job">
                     <h2><a href="{{ job.url }}" target="_blank">{{ job.title }}</a></h2>
                     <p>Company: {{ job.company }}</p>
@@ -100,6 +100,18 @@
                     {% endif %}
                 </div>
             {% endfor %}
+
+            <div style="text-align: center; margin: 30px 0;">
+                {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}&query={{ query }}&location={{ location_filter }}&company={{ company_filter }}&date_posted={{ date_posted }}"
+                       style="padding: 8px 16px; border: 1px solid var(--text-color); border-radius: 4px; color: var(--text-color); text-decoration: none; margin-right: 8px;">← Previous</a>
+                {% endif %}
+                <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}&query={{ query }}&location={{ location_filter }}&company={{ company_filter }}&date_posted={{ date_posted }}"
+                       style="padding: 8px 16px; border: 1px solid var(--text-color); border-radius: 4px; color: var(--text-color); text-decoration: none; margin-left: 8px;">Next →</a>
+                {% endif %}
+            </div>
         {% else %}
             <p style="text-align: center; font-size: 18px;">No jobs found for "{{ query }}".</p>
         {% endif %}
