@@ -16,7 +16,7 @@ Command to scrape jobs
 
 Command to migrate database
 
-    .\.venv\Scripts\python.exe manage.py migrate               
+    python manage.py migrate               
 
 Command to remove duplicate job postings
 

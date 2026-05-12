@@ -1,0 +1,7 @@
+Django==5.2.13
+psycopg2-binary==2.9.12
+python-dotenv==1.2.2
+playwright==1.59.0
+beautifulsoup4==4.14.3
+requests==2.32.3
+APScheduler==3.11.2

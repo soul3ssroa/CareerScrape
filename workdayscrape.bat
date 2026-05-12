@@ -36,4 +36,11 @@ if errorlevel 1 (
 "%PYTHON_EXE%" manage.py migrate
 if errorlevel 1 exit /b 1
 
-"%PYTHON_EXE%" manage.py scrape_jobs %*
+"%PYTHON_EXE%" manage.py scrape_jobs % --interval 43200*
+
+"%PYTHON_EXE%" manage.py cleanup_jobs --duplicates %*
+
+"%PYTHON_EXE%" manage.py cleanup_jobs --older-than-days 21%*
+
+
+

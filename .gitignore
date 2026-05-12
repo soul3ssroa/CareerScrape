@@ -1,0 +1,12 @@
+# Django
+db.sqlite3
+*.pyc
+__pycache__/
+.env
+
+# Python
+*.egg-info/
+dist/
+build/
+.venv/
+env/

@@ -212,6 +212,10 @@ WORKDAY_SITES = [
     {
         'company': 'Grubhub',
         'url' : 'https://wonder.wd1.myworkdayjobs.com/en-US/Grubhub_Careers'
+    },
+    {
+        'company': 'Philips',
+        'url': 'https://philips.wd3.myworkdayjobs.com/en-US/jobs-and-careers'
     }
     
     
@@ -225,6 +229,13 @@ JOBVITE_SITES = [
     {
         'company': 'Gigamon',
         'url': 'https://jobs.jobvite.com/gigamon/job'
+    }
+]
+
+APPLY_SITES = [
+    {
+        'company': 'Ford',
+        'url': 'https://apply.ford.com/en/sites/CX_1/jobs'
     }
 ]
 
@@ -264,7 +275,7 @@ GREENHOUSE_SITES = [
     {
         'company': 'Figma',
         'url': 'https://job-boards.greenhouse.io/figma'
-    }
+    },
 ]
 
 # Default primary key field type
