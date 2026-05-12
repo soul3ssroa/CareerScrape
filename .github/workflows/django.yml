@@ -9,9 +9,7 @@ on:
 jobs:
   build:
 
-    runs-on: 
-      -ubuntu-latest
-      -windows-latest/*
+    runs-on: ubuntu-latest
     strategy:
       max-parallel: 4
       matrix:
@@ -30,6 +28,6 @@ jobs:
     - name: Run Tests
       run: |
         python manage.py test
-        python manage.py runserver
         python manage.py scrape_jobs --interval 3600
         python manage.py cleanup_jobs --duplicates
+        python manage.py cleanup_jobs --older-than-days 21
