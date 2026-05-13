@@ -59,11 +59,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Install Railway CLI
-      run: npm install -g @railway/cli
+    - name: Deploy to Fly.io
+      uses: superfly/flyctl-actions/setup-flyctl@master
 
-    - name: Deploy to Railway
-      run: railway up --detach --service ${{ secrets.RAILWAY_SERVICE_ID }}
+    - run: flyctl deploy --remote-only
       env:
-        RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-        RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
+        FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
