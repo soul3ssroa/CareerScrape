@@ -8,7 +8,7 @@ from jobs.cleanup import delete_duplicate_jobs
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_INTERVAL = 3600  # 1 minute
+DEFAULT_INTERVAL = 86400  # 24 hours
 
 
 class Command(BaseCommand):
