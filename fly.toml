@@ -14,6 +14,12 @@ console_command = '/code/manage.py shell'
 
 [env]
   PORT = '8000'
+  DEBUG = 'False'
+  POSTGRES_HOST = 'localhost'
+  POSTGRES_PORT = '5432'
+  POSTGRES_DB = 'scorched_search'
+  POSTGRES_USER = 'postgres'
+  POSTGRES_PASSWORD = 'postgres'
 
 [http_service]
   internal_port = 8000
@@ -30,12 +36,3 @@ console_command = '/code/manage.py shell'
 [[statics]]
   guest_path = '/code/static'
   url_prefix = '/static/'
-
-[env]
-  PORT = '8000'
-  DEBUG = 'False'
-  POSTGRES_HOST = 'localhost'
-  POSTGRES_PORT = '5432'
-  POSTGRES_DB = 'scorched_search'
-  POSTGRES_USER = 'postgres'
-  POSTGRES_PASSWORD = 'postgres'  # ← ADD THIS LINE
