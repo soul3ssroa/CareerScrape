@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}Home{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Abel&display=swap" rel="stylesheet" />
     <style>
         :root {
             --bg-color: #ffffff;
@@ -15,73 +16,269 @@
             --text-color: #ffffff;
         }
 
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Courier New, Courier, monospace;
+            margin: 0;
+            padding: 0;
             background-color: var(--bg-color);
             color: var(--text-color);
+            font-family: 'Abel', sans-serif;
             transition: background-color 0.3s, color 0.3s;
         }
 
+        .page-wrapper {
+            width: 1920px;
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 20px 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 32px;
+        }
+
+        /* Top bar */
+        .top-bar {
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+        }
+
         .theme-toggle {
-            position: fixed;
-            top: 10px;
-            right: 10px;
             padding: 8px 16px;
             cursor: pointer;
             background: var(--text-color);
             color: var(--bg-color);
             border: none;
             border-radius: 4px;
+            font-family: inherit;
+            font-size: 16px;
+        }
+
+        /* Title */
+        .site-header {
+            width: 100%;
+            text-align: center;
+        }
+
+        .site-title {
+            font-size: 128px;
+            font-weight: 300;
+            line-height: 1.2;
+            margin: 0;
+            letter-spacing: 2px;
+        }
+
+        /* Block 1 - Intro */
+        .block-intro {
+            max-width: 1166px;
+            width: 100%;
+        }
+
+        .intro-text {
+            font-size: 18px;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        /* Block 2 - Search bar */
+        .block-search {
+            max-width: 1200px;
+            width: 100%;
+            display: flex;
+        }
+
+        .search-input {
+            flex: 1;
+            height: 67px;
+            padding: 0 16px;
+            font-size: 32px;
+            font-family: 'Abel', sans-serif;
+            border: 1px solid var(--text-color);
+            border-right: none;
+            border-radius: 10px 0 0 10px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            outline: none;
+        }
+
+        .search-input::placeholder {
+            color: #757575;
+        }
+
+        .btn-search {
+            width: 127px;
+            height: 67px;
+            font-size: 32px;
+            font-family: 'Abel', sans-serif;
+            cursor: pointer;
+            background: var(--text-color);
+            color: var(--bg-color);
+            border: none;
+            border-radius: 0 10px 10px 0;
+        }
+
+        /* Block 3 - Filters */
+        .block-filters {
+            max-width: 1200px;
+            width: 100%;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-input {
+            height: 48px;
+            padding: 0 12px;
+            font-size: 24px;
+            font-family: 'Abel', sans-serif;
+            border: 1px solid var(--text-color);
+            border-radius: 4px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            outline: none;
+        }
+
+        .filter-input::placeholder {
+            color: #757575;
+        }
+
+        .input-location {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .select-company,
+        .select-date {
+            min-width: 200px;
+        }
+
+        /* Block 4 - Exclude tags */
+        .block-exclude {
+            max-width: 1200px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .exclude-row {
+            display: flex;
+        }
+
+        .exclude-input {
+            flex: 1;
+            height: 34px;
+            padding: 0 12px;
+            font-size: 16px;
+            font-family: 'Abel', sans-serif;
+            border: 1px solid var(--text-color);
+            border-right: none;
+            border-radius: 10px 0 0 10px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            outline: none;
+        }
+
+        .exclude-input::placeholder {
+            color: #757575;
+        }
+
+        .btn-add {
+            height: 34px;
+            padding: 0 16px;
+            font-size: 16px;
+            font-family: 'Abel', sans-serif;
+            cursor: pointer;
+            background: var(--text-color);
+            color: var(--bg-color);
+            border: none;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .exclude-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .tag-pill {
+            padding: 4px 10px;
+            border: 1px solid var(--text-color);
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+        }
+
+        .tag-remove {
+            cursor: pointer;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+    <div class="page-wrapper">
 
-    <header>
-        <h1 style="font-size: 64px; text-align: center;">Scorched Search</h1>
-    </header>
+        <div class="top-bar">
+            <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+        </div>
 
-    <main>
-        {% block content %}
-        <p style="font-size: 18px; font-style: italic; text-align: left; padding-left: 150px; padding-right: 150px;">This is the homepage for ScorchedSearch.com. 
-            To begin, search for a role with the search bar below and this site will search for and 
-            display relavant job listings of over multiple companys, such as General Motors, Amazon, Altair, and more, by either using 
-            the companies' APIs or by directly scraping the job listing data from the company pages. The goal of this project is to provide 
-            a comprehensive and user-friendly platform for job seekers to find relevant job listings across multiple companies without having to 
-            visit each company's website individually. By utilizing APIs and web scraping techniques, we aim to aggregate job listings in one place, 
-            making it easier for users to search and apply for jobs that match their skills and interests.
-            scraping directly from the company pages. It also addresses the outdated nature of sites such as LinkedIn and Indeed by directly searching
-        companies' job boards, so if a job isn't available it won't be found on the company's site.</p>
-        <div style="padding-left: 150px; margin-top: 20px;">
-            <form id="search-form" method="post" action="{% url 'search' %}">
-                {% csrf_token %}
-                <input type="text" name="query" placeholder="Search for job..." style="padding: 8px 12px; width: 300px; border: 1px solid var(--text-color); border-radius: 4px; background-color: var(--bg-color); color: var(--text-color);" />
-                <input type="text" name="location" value="{{ location_filter }}" placeholder="Location (e.g. United States, TX, Remote)" style="margin-left: 8px; padding: 8px 12px; width: 280px; border: 1px solid var(--text-color); border-radius: 4px; background-color: var(--bg-color); color: var(--text-color);" />
-                <select name="company" style="margin-left: 8px; padding: 8px 12px; border: 1px solid var(--text-color); border-radius: 4px; background-color: var(--bg-color); color: var(--text-color);">
+        <div class="site-header">
+            <h1 class="site-title">CAREERSCRAPE</h1>
+        </div>
+
+        <form id="search-form" method="post" action="{% url 'search' %}" style="width: 100%; display: contents;">
+            {% csrf_token %}
+
+            <div class="block-intro">
+                <p class="intro-text">This is the homepage for CareerScrape.com.
+                    Type what career you are looking for and our database will provide a selection of jobs across over 50 companies you can apply to.
+                    There are also options to adjust your search based on location, company, and posting date.
+                    Most importantly, CareerScrape includes a method to write in exclusion tags, so that users such as you can type in tags to void
+                    certain words or phrases coming up in your search, such as "Senior" or "years of experience".
+                    Type in your preferences and find the perfect career for you!</p>
+            </div>
+
+            <div class="block-search">
+                <input type="text" name="query" placeholder="Search for job..." class="search-input" />
+                <button type="submit" class="btn-search">Search</button>
+            </div>
+
+            <div class="block-filters">
+                <input type="text" name="location" value="{{ location_filter }}" placeholder="Location (e.g. United States, TX, Remote)" class="filter-input input-location" />
+                <select name="company" class="filter-input select-company">
                     <option value="">All Companies</option>
                     {% for company in companies %}
                         <option value="{{ company }}" {% if company == company_filter %}selected{% endif %}>{{ company }}</option>
                     {% endfor %}
                 </select>
-                <select name="date_posted" style="margin-left: 8px; padding: 8px 12px; border: 1px solid var(--text-color); border-radius: 4px; background-color: var(--bg-color); color: var(--text-color);">
+                <select name="date_posted" class="filter-input select-date">
                     <option value="">All Time</option>
                     <option value="today" {% if date_posted == "today" %}selected{% endif %}>Today</option>
                     <option value="week" {% if date_posted == "week" %}selected{% endif %}>This Week</option>
                     <option value="month" {% if date_posted == "month" %}selected{% endif %}>This Month</option>
                     <option value="not listed" {% if date_posted == "not listed" %}selected{% endif %}>Not Listed</option>
                 </select>
-                <button type="submit" style="margin-left: 8px; padding: 8px 16px; cursor: pointer; background: var(--text-color); color: var(--bg-color); border: none; border-radius: 4px;">Search</button>
-            </form>
-            <div style="margin-top: 8px;">
-                <input type="text" id="exclude-input" placeholder="Exclude tags (comma separated, e.g. senior, years of experience)" style="padding: 8px 12px; width: 500px; border: 1px solid var(--text-color); border-radius: 4px; background-color: var(--bg-color); color: var(--text-color);" />
-                <button onclick="addExcludeTag()" style="margin-left: 8px; padding: 8px 16px; cursor: pointer; background: var(--text-color); color: var(--bg-color); border: none; border-radius: 4px;">Add</button>
-                <div id="exclude-tags" style="margin-top: 8px; display: inline-flex; flex-wrap: wrap; gap: 6px;"></div>
-                <input type="hidden" name="exclude_tags" id="exclude-tags-value" form="search-form" value="{{ exclude_tags }}" />
             </div>
+
+        </form>
+
+        <div class="block-exclude">
+            <div class="exclude-row">
+                <input type="text" id="exclude-input" placeholder="Exclude tags (comma separated, e.g. senior, years of experience)" class="exclude-input" />
+                <button onclick="addExcludeTag()" class="btn-add">Add</button>
+            </div>
+            <div id="exclude-tags" class="exclude-tags"></div>
+            <input type="hidden" name="exclude_tags" id="exclude-tags-value" form="search-form" value="{{ exclude_tags }}" />
         </div>
-        {% endblock %}
-    </main>
+
+    </div>
 
     <script>
         const savedTheme = localStorage.getItem('theme') ||
@@ -101,8 +298,8 @@
         function renderTag(tag) {
             const container = document.getElementById('exclude-tags');
             const pill = document.createElement('span');
-            pill.style.cssText = 'padding: 4px 10px; border: 1px solid var(--text-color); border-radius: 12px; display: inline-flex; align-items: center; gap: 6px; font-size: 14px;';
-            pill.innerHTML = `${tag} <span onclick="removeTag(this, '${tag}')" style="cursor:pointer; font-weight:bold;">×</span>`;
+            pill.className = 'tag-pill';
+            pill.innerHTML = `${tag} <span onclick="removeTag(this, '${tag}')" class="tag-remove">×</span>`;
             pill.dataset.tag = tag;
             container.appendChild(pill);
             updateHidden();
