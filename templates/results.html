@@ -299,8 +299,7 @@
             <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
         </div>
 
-        <form id="search-form" method="post" action="{% url 'search' %}">
-            {% csrf_token %}
+        <form id="search-form" method="get" action="{% url 'search' %}">
             <input type="hidden" name="exclude_tags" id="exclude-tags-value" value="{{ exclude_tags }}" />
 
             <div class="search-row">

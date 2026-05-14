@@ -267,16 +267,16 @@
                 </select>
             </div>
 
-        </form>
-
-        <div class="block-exclude">
-            <div class="exclude-row">
-                <input type="text" id="exclude-input" placeholder="Exclude tags (comma separated, e.g. senior, years of experience)" class="exclude-input" />
-                <button onclick="addExcludeTag()" class="btn-add">Add</button>
+            <div class="block-exclude">
+                <div class="exclude-row">
+                    <input type="text" id="exclude-input" placeholder="Exclude tags (comma separated, e.g. senior, years of experience)" class="exclude-input" />
+                    <button type="button" onclick="addExcludeTag()" class="btn-add">Add</button>
+                </div>
+                <div id="exclude-tags" class="exclude-tags"></div>
+                <input type="hidden" name="exclude_tags" id="exclude-tags-value" value="{{ exclude_tags }}" />
             </div>
-            <div id="exclude-tags" class="exclude-tags"></div>
-            <input type="hidden" name="exclude_tags" id="exclude-tags-value" form="search-form" value="{{ exclude_tags }}" />
-        </div>
+
+        </form>
 
     </div>
 
