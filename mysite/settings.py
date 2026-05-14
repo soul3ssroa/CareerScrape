@@ -208,8 +208,8 @@ WORKDAY_SITES = [
         'url': 'https://abbott.wd5.myworkdayjobs.com/en-US/abbottcareers'
     },
     {
-        'company': 'Mastercard',
-        'url': 'https://mastercard.wd1.myworkdayjobs.com/en-US/CorporateCareers?redirect=/en-US/CorporateCareers/userHome'
+        'company': 'Huntington National Bank',
+        'url': 'https://huntington.wd12.myworkdayjobs.com/en-US/HNBcareers'
     },
     {
         'company': 'SNC',
@@ -286,6 +286,15 @@ GREENHOUSE_SITES = [
         'company': 'Figma',
         'url': 'https://job-boards.greenhouse.io/figma'
     },
+    {
+        'company': 'Beyond Finance',
+        'url': 'https://www.beyondfinance.com/careers/jobs/'
+    },
+    {
+        'company': 'Lattice',
+        'url': 'https://lattice.com/careers#open-positions'
+    },
+    
 ]
 
 # Default primary key field type

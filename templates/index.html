@@ -54,7 +54,7 @@
             scraping directly from the company pages. It also addresses the outdated nature of sites such as LinkedIn and Indeed by directly searching
         companies' job boards, so if a job isn't available it won't be found on the company's site.</p>
         <div style="padding-left: 150px; margin-top: 20px;">
-            <form method="post" action="{% url 'search' %}">
+            <form id="search-form" method="post" action="{% url 'search' %}">
                 {% csrf_token %}
                 <input type="text" name="query" placeholder="Search for job..." style="padding: 8px 12px; width: 300px; border: 1px solid var(--text-color); border-radius: 4px; background-color: var(--bg-color); color: var(--text-color);" />
                 <input type="text" name="location" value="{{ location_filter }}" placeholder="Location (e.g. United States, TX, Remote)" style="margin-left: 8px; padding: 8px 12px; width: 280px; border: 1px solid var(--text-color); border-radius: 4px; background-color: var(--bg-color); color: var(--text-color);" />
@@ -73,6 +73,12 @@
                 </select>
                 <button type="submit" style="margin-left: 8px; padding: 8px 16px; cursor: pointer; background: var(--text-color); color: var(--bg-color); border: none; border-radius: 4px;">Search</button>
             </form>
+            <div style="margin-top: 8px;">
+                <input type="text" id="exclude-input" placeholder="Exclude tags (comma separated, e.g. senior, years of experience)" style="padding: 8px 12px; width: 500px; border: 1px solid var(--text-color); border-radius: 4px; background-color: var(--bg-color); color: var(--text-color);" />
+                <button onclick="addExcludeTag()" style="margin-left: 8px; padding: 8px 16px; cursor: pointer; background: var(--text-color); color: var(--bg-color); border: none; border-radius: 4px;">Add</button>
+                <div id="exclude-tags" style="margin-top: 8px; display: inline-flex; flex-wrap: wrap; gap: 6px;"></div>
+                <input type="hidden" name="exclude_tags" id="exclude-tags-value" form="search-form" value="{{ exclude_tags }}" />
+            </div>
         </div>
         {% endblock %}
     </main>
@@ -88,6 +94,46 @@
             document.documentElement.setAttribute('data-theme', next);
             localStorage.setItem('theme', next);
         }
+
+        const existingTags = document.getElementById('exclude-tags-value').value;
+        if (existingTags) existingTags.split(',').forEach(t => t.trim() && renderTag(t.trim()));
+
+        function renderTag(tag) {
+            const container = document.getElementById('exclude-tags');
+            const pill = document.createElement('span');
+            pill.style.cssText = 'padding: 4px 10px; border: 1px solid var(--text-color); border-radius: 12px; display: inline-flex; align-items: center; gap: 6px; font-size: 14px;';
+            pill.innerHTML = `${tag} <span onclick="removeTag(this, '${tag}')" style="cursor:pointer; font-weight:bold;">×</span>`;
+            pill.dataset.tag = tag;
+            container.appendChild(pill);
+            updateHidden();
+        }
+
+        function addExcludeTag() {
+            const input = document.getElementById('exclude-input');
+            input.value.split(',').forEach(t => {
+                const tag = t.trim();
+                if (!tag) return;
+                const existing = [...document.getElementById('exclude-tags').querySelectorAll('[data-tag]')].map(el => el.dataset.tag);
+                if (!existing.includes(tag)) renderTag(tag);
+            });
+            input.value = '';
+        }
+
+        function removeTag(el, tag) {
+            el.parentElement.remove();
+            updateHidden();
+        }
+
+        function updateHidden() {
+            const tags = [...document.getElementById('exclude-tags').querySelectorAll('[data-tag]')].map(el => el.dataset.tag);
+            document.getElementById('exclude-tags-value').value = tags.join(',');
+        }
+
+        document.getElementById('exclude-input').addEventListener('keydown', e => {
+            if (e.key === 'Enter') { e.preventDefault(); addExcludeTag(); }
+        });
+
+        document.getElementById('search-form').addEventListener('submit', updateHidden);
     </script>
 </body>
 </html>

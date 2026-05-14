@@ -4,7 +4,7 @@ import logging
 from django.core.management.base import BaseCommand
 
 from jobs.scraper import scrape_all_sites
-from jobs.cleanup import delete_duplicate_jobs
+from jobs.cleanup import delete_duplicate_jobs, delete_jobs_older_than
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +37,9 @@ class Command(BaseCommand):
 
                 count = delete_duplicate_jobs()
                 self.stdout.write(f'Removed {count} duplicate jobs.')
+
+                count = delete_jobs_older_than(days=24)
+                self.stdout.write(f'Removed {count} jobs older than 24 days.')
             except Exception as exc:
                 logger.exception(f'Worker cycle failed: {exc}')
 

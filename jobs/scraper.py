@@ -551,7 +551,8 @@ def scrape_greenhouse_site(site, location_filter=None):
             continue
 
         location = (job.get('location') or {}).get('name', '')
-        posted_date = parse_posted_date(job.get('first_published', '') or job.get('updated_at', ''))
+        raw_date = job.get('first_published', '') or job.get('updated_at', '')
+        posted_date = parse_posted_date(raw_date[:10] if raw_date else '')
 
         content = job.get('content', '')
         description = re.sub(r'<[^>]+>', ' ', content).strip()[:100000] if content else ''

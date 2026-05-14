@@ -40,7 +40,7 @@ if errorlevel 1 exit /b 1
 
 "%PYTHON_EXE%" manage.py cleanup_jobs --duplicates %*
 
-"%PYTHON_EXE%" manage.py cleanup_jobs --older-than-days 21%*
+"%PYTHON_EXE%" manage.py cleanup_jobs --older-than-days 24%*
 
 
 

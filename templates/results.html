@@ -57,7 +57,7 @@
     <button><a href="{% url 'home' %}">Back to Home</a></button>
 
     <div style="padding-left: 150px; margin-top: 20px;">
-        <form method="post" action="{% url 'search' %}">
+        <form id="search-form" method="post" action="{% url 'search' %}">
             {% csrf_token %}
             <input type="text" name="query" value="{{ query }}" placeholder="Search for job..." style="padding: 8px 12px; width: 300px; border: 1px solid var(--text-color); border-radius: 4px; background-color: var(--bg-color); color: var(--text-color);" />
             <input type="text" name="location" value="{{ location_filter }}" placeholder="Location (e.g. United States, TX, Remote)" style="margin-left: 8px; padding: 8px 12px; width: 280px; border: 1px solid var(--text-color); border-radius: 4px; background-color: var(--bg-color); color: var(--text-color);" />
@@ -74,8 +74,14 @@
                     <option value="month" {% if date_posted == "month" %}selected{% endif %}>This Month</option>
                     <option value="not listed" {% if date_posted == "not listed" %}selected{% endif %}>Not Listed</option>
                 </select>
+            <input type="hidden" name="exclude_tags" id="exclude-tags-value" value="{{ exclude_tags }}" />
             <button type="submit" style="margin-left: 8px; padding: 8px 16px; cursor: pointer; background: var(--text-color); color: var(--bg-color); border: none; border-radius: 4px;">Search</button>
         </form>
+        <div style="margin-top: 8px;">
+            <input type="text" id="exclude-input" placeholder="Exclude tags (comma separated, e.g. senior, years of experience)" style="padding: 8px 12px; width: 500px; border: 1px solid var(--text-color); border-radius: 4px; background-color: var(--bg-color); color: var(--text-color);" />
+            <button onclick="addExcludeTag()" style="margin-left: 8px; padding: 8px 16px; cursor: pointer; background: var(--text-color); color: var(--bg-color); border: none; border-radius: 4px;">Add</button>
+            <div id="exclude-tags" style="margin-top: 8px; display: inline-flex; flex-wrap: wrap; gap: 6px;"></div>
+        </div>
     </div>
 
     <header>
@@ -103,12 +109,21 @@
 
             <div style="text-align: center; margin: 30px 0;">
                 {% if page_obj.has_previous %}
-                    <a href="?page={{ page_obj.previous_page_number }}&query={{ query }}&location={{ location_filter }}&company={{ company_filter }}&date_posted={{ date_posted }}"
+                    <a href="?page={{ page_obj.previous_page_number }}&query={{ query }}&location={{ location_filter }}&company={{ company_filter }}&date_posted={{ date_posted }}&exclude_tags={{ exclude_tags }}"
                        style="padding: 8px 16px; border: 1px solid var(--text-color); border-radius: 4px; color: var(--text-color); text-decoration: none; margin-right: 8px;">← Previous</a>
                 {% endif %}
                 <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                <form method="get" action="{% url 'search' %}" style="display: inline; margin: 0 8px;">
+                    <input type="hidden" name="query" value="{{ query }}" />
+                    <input type="hidden" name="location" value="{{ location_filter }}" />
+                    <input type="hidden" name="company" value="{{ company_filter }}" />
+                    <input type="hidden" name="date_posted" value="{{ date_posted }}" />
+                    <input type="hidden" name="exclude_tags" value="{{ exclude_tags }}" />
+                    <input type="number" name="page" min="1" max="{{ page_obj.paginator.num_pages }}" placeholder="Go to page" style="width: 90px; padding: 6px 8px; border: 1px solid var(--text-color); border-radius: 4px; background-color: var(--bg-color); color: var(--text-color);" />
+                    <button type="submit" style="padding: 6px 12px; cursor: pointer; background: var(--text-color); color: var(--bg-color); border: none; border-radius: 4px;">Go</button>
+                </form>
                 {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}&query={{ query }}&location={{ location_filter }}&company={{ company_filter }}&date_posted={{ date_posted }}"
+                    <a href="?page={{ page_obj.next_page_number }}&query={{ query }}&location={{ location_filter }}&company={{ company_filter }}&date_posted={{ date_posted }}&exclude_tags={{ exclude_tags }}"
                        style="padding: 8px 16px; border: 1px solid var(--text-color); border-radius: 4px; color: var(--text-color); text-decoration: none; margin-left: 8px;">Next →</a>
                 {% endif %}
             </div>
@@ -128,6 +143,46 @@
             document.documentElement.setAttribute('data-theme', next);
             localStorage.setItem('theme', next);
         }
+
+        const existingTags = document.getElementById('exclude-tags-value').value;
+        if (existingTags) existingTags.split(',').forEach(t => t.trim() && renderTag(t.trim()));
+
+        function renderTag(tag) {
+            const container = document.getElementById('exclude-tags');
+            const pill = document.createElement('span');
+            pill.style.cssText = 'padding: 4px 10px; border: 1px solid var(--text-color); border-radius: 12px; display: inline-flex; align-items: center; gap: 6px; font-size: 14px;';
+            pill.innerHTML = `${tag} <span onclick="removeTag(this)" style="cursor:pointer; font-weight:bold;">×</span>`;
+            pill.dataset.tag = tag;
+            container.appendChild(pill);
+            updateHidden();
+        }
+
+        function addExcludeTag() {
+            const input = document.getElementById('exclude-input');
+            input.value.split(',').forEach(t => {
+                const tag = t.trim();
+                if (!tag) return;
+                const existing = [...document.getElementById('exclude-tags').querySelectorAll('[data-tag]')].map(el => el.dataset.tag);
+                if (!existing.includes(tag)) renderTag(tag);
+            });
+            input.value = '';
+        }
+
+        function removeTag(el) {
+            el.parentElement.remove();
+            updateHidden();
+        }
+
+        function updateHidden() {
+            const tags = [...document.getElementById('exclude-tags').querySelectorAll('[data-tag]')].map(el => el.dataset.tag);
+            document.getElementById('exclude-tags-value').value = tags.join(',');
+        }
+
+        document.getElementById('exclude-input').addEventListener('keydown', e => {
+            if (e.key === 'Enter') { e.preventDefault(); addExcludeTag(); }
+        });
+
+        document.getElementById('search-form').addEventListener('submit', updateHidden);
     </script>
 </body>
 </html>

@@ -77,6 +77,7 @@ def search_jobs(request):
     location_filter = params.get('location', '').strip()
     company_filter = params.get('company', '').strip()
     date_posted = params.get('date_posted', '').strip()
+    exclude_tags = [t.strip() for t in params.get('exclude_tags', '').split(',') if t.strip()]
 
     if not query:
         return render(request, 'index.html', {
@@ -84,6 +85,7 @@ def search_jobs(request):
             'location_filter': location_filter,
             'company_filter': company_filter,
             'date_posted': date_posted,
+            'exclude_tags': params.get('exclude_tags', ''),
             'companies': _all_companies(),
         })
 
@@ -101,6 +103,10 @@ def search_jobs(request):
         job for job in jobs.iterator()
         if job_matches_location_filter(job, location_filter)
         and job_matches_date_filter(job, date_posted, today)
+        and not any(
+            tag.lower() in job.title.lower() or tag.lower() in (job.description or '').lower()
+            for tag in exclude_tags
+        )
     ]
 
     paginator = Paginator(all_jobs, 30)
@@ -114,5 +120,6 @@ def search_jobs(request):
         'location_filter': location_filter,
         'company_filter': company_filter,
         'date_posted': date_posted,
+        'exclude_tags': params.get('exclude_tags', ''),
         'companies': _all_companies(),
     })
