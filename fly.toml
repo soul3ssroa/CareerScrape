@@ -23,7 +23,7 @@ console_command = '/code/manage.py shell'
 
 [processes]
   app = 'gunicorn mysite.wsgi:application --bind 0.0.0.0:8000'
-  worker = 'python manage.py run_worker'
+  worker = 'sh /code/jobscrape.sh'
 
 [http_service]
   internal_port = 8000

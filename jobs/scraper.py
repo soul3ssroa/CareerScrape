@@ -22,8 +22,8 @@ from .models import Job
 from .utils import get_location_from_workday_url, location_matches_filter, parse_posted_date
 
 
-DEFAULT_JOBS_PER_SITE = 100
-FILTERED_JOBS_PER_SITE = 50
+DEFAULT_JOBS_PER_SITE = 250
+FILTERED_JOBS_PER_SITE = 100
 MAX_LISTING_LOAD_ATTEMPTS = 30
 API_PAGE_SIZE = 20
 API_MAX_PAGES = 500
