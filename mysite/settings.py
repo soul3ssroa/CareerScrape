@@ -250,8 +250,11 @@ WORKDAY_SITES = [
     {
         'company': 'Magna',
         'url': 'https://wd3.myworkdaysite.com/recruiting/magna/Magna'
-    }
-    
+    },
+    {
+        'company': 'Boston Dynamics',
+        'url': 'https://bostondynamics.wd1.myworkdayjobs.com/en-US/Boston_Dynamics'
+    },
 ]
 
 LEVER_SITES = [
@@ -270,6 +273,30 @@ LEVER_SITES = [
     {
         'company': 'Revel',
         'url': 'https://jobs.lever.co/revel/',
+    },
+    {
+        'company': 'FloQast',
+        'url': 'https://jobs.lever.co/floqast',
+    },
+    {
+        'company': 'Shield AI',
+        'url': 'https://jobs.lever.co/shieldai',
+    },
+    {
+        'company': 'PointClickCare',
+        'url': 'https://jobs.lever.co/pointclickcare',
+    },
+    {
+        'company': 'Zeta',
+        'url': 'https://jobs.lever.co/zeta',
+    },
+    {
+        'company': 'GoodLeap',
+        'url': 'https://jobs.lever.co/goodleap',
+    },
+    {
+        'company': 'Palantir',
+        'url': 'https://jobs.lever.co/palantir',
     },
 ]
 
@@ -309,6 +336,14 @@ ASHBY_SITES = [
     {
         'company': 'Sesame',
         'url': 'https://jobs.ashbyhq.com/sesame/',
+    },
+    {
+        'company': 'OpenAI',
+        'url': 'https://jobs.ashbyhq.com/openai',
+    },
+    {
+        'company': 'Crusoe',
+        'url': 'https://jobs.ashbyhq.com/Crusoe',
     },
 ]
 
@@ -467,7 +502,146 @@ GREENHOUSE_SITES = [
         'company': 'Lattice',
         'url': 'https://lattice.com/careers#open-positions'
     },
-    
+    {
+        'company': 'Growtherapy',
+        'url': 'https://job-boards.greenhouse.io/growtherapy',
+    },
+    {
+        'company': 'Lila Sciences',
+        'url': 'https://job-boards.greenhouse.io/lilasciences',
+    },
+    {
+        'company': 'Twin Health',
+        'url': 'https://job-boards.greenhouse.io/twinhealth',
+    },
+    {
+        'company': 'Together AI',
+        'url': 'https://job-boards.greenhouse.io/togetherai',
+    },
+    {
+        'company': 'SHEIN',
+        'url': 'https://job-boards.greenhouse.io/shein',
+    },
+    {
+        'company': 'Warp',
+        'url': 'https://job-boards.greenhouse.io/warp',
+    },
+    {
+        'company': 'Divergent',
+        'url': 'https://job-boards.greenhouse.io/divergent',
+    },
+    {
+        'company': 'Scout Motors',
+        'url': 'https://job-boards.greenhouse.io/scoutmotors',
+    },
+    {
+        'company': 'Hightouch',
+        'url': 'https://job-boards.greenhouse.io/hightouch',
+    },
+    {
+        'company': 'Prismatic',
+        'url': 'https://job-boards.greenhouse.io/prismatic',
+    },
+    {
+        'company': 'Turbine One',
+        'url': 'https://job-boards.greenhouse.io/turbineone',
+    },
+    {
+        'company': 'Postman',
+        'url': 'https://job-boards.greenhouse.io/postman',
+    },
+    {
+        'company': 'Qualia',
+        'url': 'https://job-boards.greenhouse.io/qualia',
+    },
+    {
+        'company': 'Samsung Semiconductor',
+        'url': 'https://job-boards.greenhouse.io/samsungsemiconductor',
+    },
+    {
+        'company': 'Robinhood',
+        'url': 'https://job-boards.greenhouse.io/robinhood',
+    },
+    {
+        'company': 'AlphaSense',
+        'url': 'https://job-boards.greenhouse.io/alphasense',
+    },
+    {
+        'company': 'Checkr',
+        'url': 'https://job-boards.greenhouse.io/checkr',
+    },
+    {
+        'company': 'Carta',
+        'url': 'https://job-boards.greenhouse.io/carta',
+    },
+    {
+        'company': 'Freenome',
+        'url': 'https://job-boards.greenhouse.io/freenome',
+    },
+    {
+        'company': 'Omada Health',
+        'url': 'https://job-boards.greenhouse.io/omadahealth',
+    },
+    {
+        'company': 'Panther Labs',
+        'url': 'https://job-boards.greenhouse.io/pantherlabs',
+    },
+    {
+        'company': 'Heartflow',
+        'url': 'https://job-boards.greenhouse.io/heartflowinc',
+    },
+    {
+        'company': 'Snorkel AI',
+        'url': 'https://job-boards.greenhouse.io/snorkelai',
+    },
+    {
+        'company': 'DriveWealth',
+        'url': 'https://job-boards.greenhouse.io/drivewealth',
+    },
+    {
+        'company': 'TaxBit',
+        'url': 'https://job-boards.greenhouse.io/taxbit',
+    },
+    {
+        'company': 'Tanium',
+        'url': 'https://job-boards.greenhouse.io/tanium',
+    },
+    {
+        'company': 'Mercury',
+        'url': 'https://job-boards.greenhouse.io/mercury',
+    },
+    {
+        'company': 'Addepar',
+        'url': 'https://job-boards.greenhouse.io/addepar1',
+    },
+    {
+        'company': 'Roofstock',
+        'url': 'https://job-boards.greenhouse.io/roofstock',
+    },
+    {
+        'company': 'OneTrust',
+        'url': 'https://job-boards.greenhouse.io/onetrust',
+    },
+    {
+        'company': 'ZocDoc',
+        'url': 'https://job-boards.greenhouse.io/zocdoc/jobs',
+    },
+    {
+        'company': 'Extend',
+        'url': 'https://job-boards.greenhouse.io/extend',
+    },
+    {
+        'company': 'Cerebras Systems',
+        'url': 'https://job-boards.greenhouse.io/cerebrassystems',
+    },
+    {
+        'company': 'Spring Health',
+        'url': 'https://job-boards.greenhouse.io/springhealth66',
+    },
+    {
+        'company': 'Gusto',
+        'url': 'https://job-boards.greenhouse.io/gusto',
+    },
 ]
 
 # Default primary key field type

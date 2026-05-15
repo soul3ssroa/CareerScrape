@@ -28,7 +28,7 @@ class Command(BaseCommand):
         parser.add_argument(
             '--source',
             default=None,
-            choices=['workday', 'jobvite', 'greenhouse', 'lever', 'ashby'],
+            choices=['workday', 'jobvite', 'greenhouse', 'lever', 'ashby', 'apply'],
             help='Only scrape from this platform. Omit to scrape all.',
         )
 

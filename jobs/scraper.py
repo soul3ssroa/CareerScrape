@@ -692,12 +692,89 @@ def scrape_ashby_site(site, location_filter=None):
     print(f'{company}: saved {len(saved_urls)} jobs.')
     return saved_urls
 
+def scrape_apply_site(site, location_filter=None):
+    company = site.get('company', 'Apply')
+    site_url = site.get('url', '')
+    parsed = urlparse(site_url)
+    path_parts = [p for p in parsed.path.split('/') if p]
+    try:
+        site_number = path_parts[path_parts.index('sites') + 1]
+    except (ValueError, IndexError):
+        print(f'Could not determine site number from URL: {site_url}')
+        return []
+
+    # Extract the Oracle Cloud host from the page HTML
+    oracle_host = None
+    try:
+        html = _fetch_html(site_url)
+        match = re.search(r'https://([a-z0-9]+\.fa\.[a-z0-9]+\.oraclecloud\.com)', html)
+        if match:
+            oracle_host = match.group(1)
+    except Exception as exc:
+        print(f'Could not fetch page to resolve Oracle host for {company}: {exc}')
+
+    if not oracle_host:
+        print(f'Could not resolve Oracle host for {company}')
+        return []
+
+    api_base = f'https://{oracle_host}/hcmRestApi/resources/latest/recruitingCEJobRequisitions'
+    saved_urls = []
+    limit = 100
+    offset = 0
+
+    print(f'Scraping Apply (Oracle HCM): {company} ({oracle_host})')
+    while True:
+        try:
+            data = _api_json(
+                f'{api_base}?onlyData=true&expand=requisitionList'
+                f'&finder=findReqs;siteNumber={site_number},limit={limit},offset={offset}'
+            )
+        except (HTTPError, URLError, TimeoutError, json.JSONDecodeError) as exc:
+            print(f'Oracle HCM API failed for {company}: {exc}')
+            break
+
+        jobs = (data.get('items') or [{}])[0].get('requisitionList', [])
+        if not jobs:
+            break
+
+        for job in jobs:
+            job_id = job.get('Id', '')
+            if not job_id:
+                continue
+            job_url = f'https://{parsed.netloc}/en/sites/{site_number}/jobs/{job_id}/job'
+            title = job.get('Title', 'Unknown Title')
+            location = job.get('PrimaryLocation', '')
+            posted_date = parse_posted_date(job.get('PostedDate', ''))
+            description = (job.get('ShortDescriptionStr', '') or '')[:100000]
+
+            if not _job_matches_location(location, location_filter):
+                print(f"Skipped '{location_filter}' filter: {title} ({location or 'No location'})")
+                continue
+
+            saved_urls.append(_save_job_source({
+                'title': title,
+                'url': job_url,
+                'location': location,
+                'posted_date': posted_date,
+                'description': description,
+                'company': company,
+            }, 'apply'))
+
+        if len(jobs) < limit:
+            break
+        offset += limit
+
+    print(f'{company}: saved {len(saved_urls)} jobs.')
+    return saved_urls
+
+
 def scrape_all_sites(location_filter=None, source=None):
     workday_sites = getattr(settings, 'WORKDAY_SITES', []) if source in (None, 'workday') else []
     jobvite_sites = getattr(settings, 'JOBVITE_SITES', []) if source in (None, 'jobvite') else []
     greenhouse_sites = getattr(settings, 'GREENHOUSE_SITES', []) if source in (None, 'greenhouse') else []
     lever_sites = getattr(settings, 'LEVER_SITES', []) if source in (None, 'lever') else []
     ashby_sites = getattr(settings, 'ASHBY_SITES', []) if source in (None, 'ashby') else []
+    apply_sites = getattr(settings, 'APPLY_SITES', []) if source in (None, 'apply') else []
 
     seen_urls = []
     failed_sites = []
@@ -732,6 +809,10 @@ def scrape_all_sites(location_filter=None, source=None):
 
     for site in ashby_sites:
         site_urls = scrape_ashby_site(site, location_filter=location_filter)
+        seen_urls.extend(site_urls or [])
+
+    for site in apply_sites:
+        site_urls = scrape_apply_site(site, location_filter=location_filter)
         seen_urls.extend(site_urls or [])
 
     if location_filter:
