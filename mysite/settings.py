@@ -36,6 +36,10 @@ ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',') if os.environ.get
 
 CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',') if os.environ.get('CSRF_TRUSTED_ORIGINS') else []
 
+CSRF_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_SECURE = not DEBUG
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 
 # Application definition
 
@@ -148,6 +152,22 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 WORKDAY_SITES = [
     {
+        'company': 'KION Group',
+        'url': 'https://kiongroup.wd3.myworkdayjobs.com/en-US/KION_SCS',
+    },
+    {
+        'company': 'HPE',
+        'url': 'https://hpe.wd5.myworkdayjobs.com/en-US/Jobsathpe',
+    },
+    {
+        'company': 'Blue Origin',
+        'url': 'https://blueorigin.wd5.myworkdayjobs.com/en-US/BlueOrigin',
+    },
+    {
+        'company': 'Community Brands',
+        'url': 'https://communitybrands.wd1.myworkdayjobs.com/en-US/Momentive_External_Careers',
+    },
+    {
         'company': 'General Motors',
         'url': 'https://generalmotors.wd5.myworkdayjobs.com/Careers_GM',
     },
@@ -226,9 +246,70 @@ WORKDAY_SITES = [
     {
         'company': 'Philips',
         'url': 'https://philips.wd3.myworkdayjobs.com/en-US/jobs-and-careers'
+    },
+    {
+        'company': 'Magna',
+        'url': 'https://wd3.myworkdaysite.com/recruiting/magna/Magna'
     }
     
-    
+]
+
+LEVER_SITES = [
+    {
+        'company': 'Zoox',
+        'url': 'https://jobs.lever.co/zoox/',
+    },
+    {
+        'company': 'Mistral',
+        'url': 'https://jobs.lever.co/mistral/',
+    },
+    {
+        'company': 'Lumafield',
+        'url': 'https://jobs.lever.co/lumafield/',
+    },
+    {
+        'company': 'Revel',
+        'url': 'https://jobs.lever.co/revel/',
+    },
+]
+
+ASHBY_SITES = [
+    {
+        'company': 'Mach',
+        'url': 'https://jobs.ashbyhq.com/mach',
+    },
+    {
+        'company': 'Notion',
+        'url': 'https://jobs.ashbyhq.com/notion',
+    },
+    {
+        'company': 'Ramp',
+        'url': 'https://jobs.ashbyhq.com/ramp',
+    },
+    {
+        'company': 'Clay Labs',
+        'url': 'https://jobs.ashbyhq.com/claylabs',
+    },
+    {
+        'company': 'Etched',
+        'url': 'https://jobs.ashbyhq.com/etched',
+    },
+    {
+        'company': 'Apex Technology',
+        'url': 'https://jobs.ashbyhq.com/apex-technology-inc/',
+    },
+    {
+        'company': 'Open Loop Health',
+        'url': 'https://jobs.ashbyhq.com/openloophealth',
+    },
+    {
+        'company': 'Form Energy',
+        'url': 'https://jobs.ashbyhq.com/formenergy/',
+    },
+    {
+        'company': 'Sesame',
+        'url': 'https://jobs.ashbyhq.com/sesame/',
+    },
 ]
 
 JOBVITE_SITES = [
@@ -250,6 +331,98 @@ APPLY_SITES = [
 ]
 
 GREENHOUSE_SITES = [
+    {
+        'company': 'Two Six Technologies',
+        'url': 'https://job-boards.greenhouse.io/twosixtechnologies',
+    },
+    {
+        'company': 'Applied Intuition',
+        'url': 'https://job-boards.greenhouse.io/appliedintuition',
+    },
+    {
+        'company': 'RunPod',
+        'url': 'https://job-boards.greenhouse.io/runpod',
+    },
+    {
+        'company': 'Next Insurance',
+        'url': 'https://job-boards.greenhouse.io/nextinsurance66',
+    },
+    {
+        'company': 'Reddit',
+        'url': 'https://job-boards.greenhouse.io/reddit',
+    },
+    {
+        'company': 'Tailscale',
+        'url': 'https://job-boards.greenhouse.io/tailscale/',
+    },
+    {
+        'company': 'Jane Street',
+        'url': 'https://job-boards.greenhouse.io/janestreet/',
+    },
+    {
+        'company': 'Inversion Space',
+        'url': 'https://job-boards.greenhouse.io/inversionspace',
+    },
+    {
+        'company': 'Vercel',
+        'url': 'https://job-boards.greenhouse.io/vercel',
+    },
+    {
+        'company': 'Pure Storage',
+        'url': 'https://job-boards.greenhouse.io/purestorage/',
+    },
+    {
+        'company': 'MATX',
+        'url': 'https://job-boards.greenhouse.io/matx',
+    },
+    {
+        'company': 'Affirm',
+        'url': 'https://job-boards.greenhouse.io/affirm'
+    },
+    {
+        'company': 'Dataiku',
+        'url': 'https://job-boards.greenhouse.io/dataiku/',
+    },
+    {
+        'company': 'IMC',
+        'url': 'https://job-boards.eu.greenhouse.io/imc',
+    },
+    {
+        'company': 'Glean',
+        'url': 'https://job-boards.greenhouse.io/gleanwork',
+    },
+    {
+        'company': 'General Matter',
+        'url': 'https://job-boards.greenhouse.io/generalmatter',
+    },
+    {
+        'company': 'Tenstorrent',
+        'url': 'https://job-boards.greenhouse.io/tenstorrent',
+    },
+    {
+        'company': 'Automox',
+        'url': 'https://job-boards.greenhouse.io/automox',
+    },
+    {
+        'company': 'Thinking Machines',
+        'url': 'https://job-boards.greenhouse.io/thinkingmachines',
+    },
+    {
+        'company': 'Lightning AI',
+        'url': 'https://job-boards.greenhouse.io/lightningai',
+    },
+    {
+        'company': 'Imbue',
+        'url': 'https://job-boards.greenhouse.io/imbue',
+    },
+    {
+        'company': 'Cresta',
+        'url': 'https://job-boards.greenhouse.io/cresta',
+    },
+    {
+        'company': 'Avride',
+        'url': 'https://job-boards.greenhouse.io/avride',
+    },
     {
         'company': 'Loop',
         'url': 'https://job-boards.greenhouse.io/loop'

@@ -49,6 +49,8 @@ def _all_companies():
         getattr(settings, 'WORKDAY_SITES', []),
         getattr(settings, 'JOBVITE_SITES', []),
         getattr(settings, 'GREENHOUSE_SITES', []),
+        getattr(settings, 'LEVER_SITES', []),
+        getattr(settings, 'ASHBY_SITES', []),
     ]
     seen = set()
     companies = []

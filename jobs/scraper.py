@@ -1,6 +1,7 @@
 import re
 import json
 import time
+from datetime import date as date_cls
 from urllib.error import HTTPError, URLError
 from urllib.parse import urljoin, urlparse
 from urllib.request import Request, urlopen
@@ -574,10 +575,129 @@ def scrape_greenhouse_site(site, location_filter=None):
     return saved_urls
 
 
+def scrape_lever_site(site, location_filter=None):
+    company = site.get('company', 'Lever')
+    site_url = site.get('url').rstrip('/')
+    parsed = urlparse(site_url)
+    # Extract slug: last path segment e.g. /zoox/ -> zoox
+    slug = [p for p in parsed.path.split('/') if p][-1]
+    api_url = f'https://api.lever.co/v0/postings/{slug}?mode=json'
+    print(f'Scraping Lever: {company} ({api_url})')
+    try:
+        data = _api_json(api_url)
+    except (HTTPError, URLError, TimeoutError, json.JSONDecodeError) as exc:
+        print(f'Lever API failed for {company}: {exc}')
+        return []
+
+    saved_urls = []
+    for job in data:
+        title = job.get('text', 'Unknown Title')
+        job_url = job.get('hostedUrl', '')
+        if not job_url:
+            continue
+
+        # Location: categories.location is the primary field
+        categories = job.get('categories', {})
+        location = categories.get('location', '') or categories.get('allLocations', '')
+        if isinstance(location, list):
+            location = ', '.join(location)
+
+        # Posted date: createdAt is a Unix timestamp in milliseconds
+        created_at = job.get('createdAt')
+        posted_date = None
+        if created_at:
+            try:
+                posted_date = date_cls.fromtimestamp(int(created_at) / 1000)
+            except (ValueError, OSError):
+                pass
+
+        # Description: combine plain text fields
+        description_parts = []
+        for field in ('descriptionPlain', 'description', 'additionalPlain', 'additional'):
+            val = job.get(field, '')
+            if val:
+                # Strip HTML tags if present
+                val = re.sub(r'<[^>]+>', ' ', val).strip()
+                description_parts.append(val)
+        description = ' '.join(description_parts)[:100000]
+
+        if not _job_matches_location(location, location_filter):
+            print(f"Skipped '{location_filter}' filter: {title} ({location or 'No location'})")
+            continue
+
+        saved_urls.append(_save_job_source({
+            'title': title,
+            'url': job_url,
+            'location': location,
+            'posted_date': posted_date,
+            'description': description,
+            'company': company,
+        }, 'lever'))
+
+    print(f'{company}: saved {len(saved_urls)} jobs.')
+    return saved_urls
+
+
+def scrape_ashby_site(site, location_filter=None):
+    company = site.get('company', 'Ashby')
+    site_url = site.get('url').rstrip('/')
+    parsed = urlparse(site_url)
+    # Slug is the last path segment e.g. /ramp -> ramp
+    slug = [p for p in parsed.path.split('/') if p][-1]
+    api_url = f'https://api.ashbyhq.com/posting-api/job-board/{slug}?includeCompensation=true'
+    print(f'Scraping Ashby: {company} ({api_url})')
+    try:
+        data = _api_json(api_url)
+    except (HTTPError, URLError, TimeoutError, json.JSONDecodeError) as exc:
+        print(f'Ashby API failed for {company}: {exc}')
+        return []
+
+    saved_urls = []
+    for job in data.get('jobs', []):
+        title = job.get('title', 'Unknown Title')
+        job_url = job.get('jobUrl', '') or job.get('applyUrl', '')
+        if not job_url:
+            continue
+
+        # Location
+        location = job.get('location', '') or job.get('locationName', '')
+        if not location:
+            loc = job.get('primaryLocation') or {}
+            location = loc.get('locationName', '') or loc.get('city', '')
+        if isinstance(location, list):
+            location = ', '.join(location)
+
+        # Posted date: publishedAt ISO string e.g. "2024-03-15T12:00:00.000Z"
+        posted_date = parse_posted_date(job.get('publishedAt', '')[:10])
+        if not posted_date:
+            posted_date = parse_posted_date(job.get('updatedAt', '')[:10])
+
+        # Description
+        content = job.get('descriptionHtml', '') or job.get('descriptionPlain', '')
+        description = re.sub(r'<[^>]+>', ' ', content).strip()[:100000] if content else ''
+
+        if not _job_matches_location(location, location_filter):
+            print(f"Skipped '{location_filter}' filter: {title} ({location or 'No location'})")
+            continue
+
+        saved_urls.append(_save_job_source({
+            'title': title,
+            'url': job_url,
+            'location': location,
+            'posted_date': posted_date,
+            'description': description,
+            'company': company,
+        }, 'ashby'))
+
+    print(f'{company}: saved {len(saved_urls)} jobs.')
+    return saved_urls
+
 def scrape_all_sites(location_filter=None, source=None):
     workday_sites = getattr(settings, 'WORKDAY_SITES', []) if source in (None, 'workday') else []
     jobvite_sites = getattr(settings, 'JOBVITE_SITES', []) if source in (None, 'jobvite') else []
     greenhouse_sites = getattr(settings, 'GREENHOUSE_SITES', []) if source in (None, 'greenhouse') else []
+    lever_sites = getattr(settings, 'LEVER_SITES', []) if source in (None, 'lever') else []
+    ashby_sites = getattr(settings, 'ASHBY_SITES', []) if source in (None, 'ashby') else []
 
     seen_urls = []
     failed_sites = []
@@ -604,6 +724,14 @@ def scrape_all_sites(location_filter=None, source=None):
 
     for site in greenhouse_sites:
         site_urls = scrape_greenhouse_site(site, location_filter=location_filter)
+        seen_urls.extend(site_urls or [])
+
+    for site in lever_sites:
+        site_urls = scrape_lever_site(site, location_filter=location_filter)
+        seen_urls.extend(site_urls or [])
+
+    for site in ashby_sites:
+        site_urls = scrape_ashby_site(site, location_filter=location_filter)
         seen_urls.extend(site_urls or [])
 
     if location_filter:
