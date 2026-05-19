@@ -255,6 +255,34 @@ WORKDAY_SITES = [
         'company': 'Boston Dynamics',
         'url': 'https://bostondynamics.wd1.myworkdayjobs.com/en-US/Boston_Dynamics'
     },
+    {
+        'company': 'Cooper Standard',
+        'url': 'https://cooperstandard.wd1.myworkdayjobs.com/en-US/CooperStandard'
+    },
+    {
+        'company': 'Alegeus',
+        'url': 'https://alegeus.wd1.myworkdayjobs.com/en-US/Alegeus_External_Careers'
+    },
+    {
+        'company': 'Cadence',
+        'url': 'https://cadence.wd1.myworkdayjobs.com/en-US/External_Careers'
+    },
+    {
+        'company': 'Kendall Group',
+        'url': 'https://kendallgroup.wd503.myworkdayjobs.com/en-US/Kendall_Careers'
+    },
+    {
+        'company': 'AspenTech',
+        'url': 'https://aspentech.wd5.myworkdayjobs.com/en-US/aspentech'
+    },
+    {
+        'company': 'Raymond James',
+        'url': 'https://raymondjames.wd1.myworkdayjobs.com/en-US/RaymondJamesCareers'
+    },
+    {
+        'company': 'TTI',
+        'url': 'https://tti.wd1.myworkdayjobs.com/en-US/Milwaukee'
+    },
 ]
 
 LEVER_SITES = [
@@ -362,7 +390,15 @@ APPLY_SITES = [
     {
         'company': 'Ford',
         'url': 'https://apply.ford.com/en/sites/CX_1/jobs'
-    }
+    },
+    {
+        'company': 'TTI (Oracle)',
+        'url': 'https://fa-exty-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/jobs'
+    },
+    {
+        'company': 'UL Solutions',
+        'url': 'https://fa-eups-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/ULSolutionsCareers/jobs'
+    },
 ]
 
 GREENHOUSE_SITES = [

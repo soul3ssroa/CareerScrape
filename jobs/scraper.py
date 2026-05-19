@@ -703,19 +703,25 @@ def scrape_apply_site(site, location_filter=None):
         print(f'Could not determine site number from URL: {site_url}')
         return []
 
-    # Extract the Oracle Cloud host from the page HTML
-    oracle_host = None
-    try:
-        html = _fetch_html(site_url)
-        match = re.search(r'https://([a-z0-9]+\.fa\.[a-z0-9]+\.oraclecloud\.com)', html)
-        if match:
-            oracle_host = match.group(1)
-    except Exception as exc:
-        print(f'Could not fetch page to resolve Oracle host for {company}: {exc}')
+    # If the URL is already on oraclecloud.com, use it directly
+    if 'oraclecloud.com' in parsed.netloc:
+        oracle_host = parsed.netloc
+    else:
+        # Extract the Oracle Cloud host from the page HTML (e.g. apply.ford.com)
+        oracle_host = None
+        try:
+            html = _fetch_html(site_url)
+            match = re.search(r'https://([a-z0-9-]+\.fa\.[a-z0-9]+\.oraclecloud\.com)', html)
+            if match:
+                oracle_host = match.group(1)
+        except Exception as exc:
+            print(f'Could not fetch page to resolve Oracle host for {company}: {exc}')
+        if not oracle_host:
+            print(f'Could not resolve Oracle host for {company}')
+            return []
 
-    if not oracle_host:
-        print(f'Could not resolve Oracle host for {company}')
-        return []
+    # For proxied sites (e.g. apply.ford.com), job URLs use the original netloc
+    job_url_host = parsed.netloc if 'oraclecloud.com' not in parsed.netloc else oracle_host
 
     api_base = f'https://{oracle_host}/hcmRestApi/resources/latest/recruitingCEJobRequisitions'
     saved_urls = []
@@ -741,7 +747,7 @@ def scrape_apply_site(site, location_filter=None):
             job_id = job.get('Id', '')
             if not job_id:
                 continue
-            job_url = f'https://{parsed.netloc}/en/sites/{site_number}/jobs/{job_id}/job'
+            job_url = f'https://{job_url_host}/hcmUI/CandidateExperience/en/sites/{site_number}/jobs/{job_id}/job'
             title = job.get('Title', 'Unknown Title')
             location = job.get('PrimaryLocation', '')
             posted_date = parse_posted_date(job.get('PostedDate', ''))
