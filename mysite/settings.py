@@ -280,6 +280,10 @@ WORKDAY_SITES = [
         'url': 'https://raymondjames.wd1.myworkdayjobs.com/en-US/RaymondJamesCareers'
     },
     {
+        'company': 'Chewy',
+        'url': 'https://chewy.wd5.myworkdayjobs.com/en-US/External'
+    },
+    {
         'company': 'TTI',
         'url': 'https://tti.wd1.myworkdayjobs.com/en-US/Milwaukee'
     },
@@ -323,8 +327,8 @@ LEVER_SITES = [
         'url': 'https://jobs.lever.co/goodleap',
     },
     {
-        'company': 'Palantir',
-        'url': 'https://jobs.lever.co/palantir',
+        'company': 'Spotify',
+        'url': 'https://jobs.lever.co/spotify/',
     },
 ]
 
@@ -373,6 +377,18 @@ ASHBY_SITES = [
         'company': 'Crusoe',
         'url': 'https://jobs.ashbyhq.com/Crusoe',
     },
+    {
+        'company': 'Legora',
+        'url': 'https://jobs.ashbyhq.com/legora/',
+    },
+    {
+        'company': 'LangChain',
+        'url': 'https://jobs.ashbyhq.com/langchain',
+    },
+    {
+        'company': 'Plaid',
+        'url': 'https://jobs.ashbyhq.com/plaid',
+    },
 ]
 
 JOBVITE_SITES = [
@@ -381,9 +397,13 @@ JOBVITE_SITES = [
         'url' : 'https://jobs.jobvite.com/tylertech/jobs'
     },
     {
-        'company': 'Gigamon',
+        'company': 'Jobvite',
         'url': 'https://jobs.jobvite.com/gigamon/job'
-    }
+    },
+    {
+        'company': 'Versa Networks',
+        'url': 'https://jobs.jobvite.com/versa-networks/jobs'
+    },
 ]
 
 APPLY_SITES = [
@@ -677,6 +697,22 @@ GREENHOUSE_SITES = [
     {
         'company': 'Gusto',
         'url': 'https://job-boards.greenhouse.io/gusto',
+    },
+    {
+        'company': 'Contentful',
+        'url': 'https://job-boards.greenhouse.io/contentful',
+    },
+    {
+        'company': 'Archer',
+        'url': 'https://job-boards.greenhouse.io/archer56',
+    },
+    {
+        'company': 'Anthropic',
+        'url': 'https://job-boards.greenhouse.io/anthropic',
+    },
+    {
+        'company': 'Muon Space',
+        'url': 'https://job-boards.greenhouse.io/muonspace/',
     },
 ]
 
