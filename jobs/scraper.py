@@ -786,21 +786,6 @@ def scrape_all_sites(location_filter=None, source=None):
     failed_sites = []
     selenium_driver = None
 
-    try:
-        for site in workday_sites:
-            site_urls = scrape_workday_site_api(site, location_filter=location_filter)
-            if site_urls is None:
-                if selenium_driver is None:
-                    selenium_driver = _build_chrome_driver()
-                site_urls = scrape_workday_site(selenium_driver, site, location_filter=location_filter)
-            if site_urls:
-                seen_urls.extend(site_urls)
-            else:
-                failed_sites.append(site.get('company', 'Workday'))
-    finally:
-        if selenium_driver is not None:
-            selenium_driver.quit()
-
     for site in jobvite_sites:
         site_urls = scrape_jobvite_site(site, location_filter=location_filter)
         seen_urls.extend(site_urls or [])
@@ -820,6 +805,21 @@ def scrape_all_sites(location_filter=None, source=None):
     for site in apply_sites:
         site_urls = scrape_apply_site(site, location_filter=location_filter)
         seen_urls.extend(site_urls or [])
+
+    try:
+        for site in workday_sites:
+            site_urls = scrape_workday_site_api(site, location_filter=location_filter)
+            if site_urls is None:
+                if selenium_driver is None:
+                    selenium_driver = _build_chrome_driver()
+                site_urls = scrape_workday_site(selenium_driver, site, location_filter=location_filter)
+            if site_urls:
+                seen_urls.extend(site_urls)
+            else:
+                failed_sites.append(site.get('company', 'Workday'))
+    finally:
+        if selenium_driver is not None:
+            selenium_driver.quit()
 
     if location_filter:
         print('Skipping stale job cleanup because a location filter was used.')

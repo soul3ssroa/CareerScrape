@@ -280,6 +280,14 @@ WORKDAY_SITES = [
         'url': 'https://raymondjames.wd1.myworkdayjobs.com/en-US/RaymondJamesCareers'
     },
     {
+        'company': 'Ilitch Companies',
+        'url': 'https://ilitch.wd5.myworkdayjobs.com/en-US/LC'
+    },
+    {
+        'company': 'Sonoco',
+        'url': 'https://sonoco.wd1.myworkdayjobs.com/en-US/CorporateCareers'
+    },
+    {
         'company': 'Chewy',
         'url': 'https://chewy.wd5.myworkdayjobs.com/en-US/External'
     },
@@ -406,7 +414,7 @@ JOBVITE_SITES = [
     },
 ]
 
-APPLY_SITES = [
+ORACLECLOUD_SITES = [
     {
         'company': 'Ford',
         'url': 'https://apply.ford.com/en/sites/CX_1/jobs'
@@ -418,6 +426,14 @@ APPLY_SITES = [
     {
         'company': 'UL Solutions',
         'url': 'https://fa-eups-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/ULSolutionsCareers/jobs'
+    },
+    {
+        'company': 'Emerson',
+        'url': 'https://hdjq.fa.us2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/jobs'
+    },
+    {
+        'company': 'Honeywell',
+        'url': 'https://ibqbjb.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/Honeywell/jobs'
     },
 ]
 
