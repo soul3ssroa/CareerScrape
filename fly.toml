@@ -42,8 +42,8 @@ console_command = '/code/manage.py shell'
 [[vm]]
   memory = '2gb'
   cpu_kind = 'shared'
-  cpus = 3
-  memory_mb = 1024
+  cpus = 4
+  memory_mb = 2048
   processes = ['worker']
 
 [[statics]]
