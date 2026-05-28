@@ -28,10 +28,14 @@ def job_matches_date_filter(job, date_posted, today):
         return d is None
     if d is None:
         return False
+    if date_posted == '3days':
+        return d >= today - timedelta(days=3)
     if date_posted == 'today':
         return d >= today
     if date_posted == 'week':
         return d >= today - timedelta(days=7)
+    if date_posted == '2weeks':
+        return d >= today - timedelta(days=14)
     if date_posted == 'month':
         return d >= today - timedelta(days=30)
     return True

@@ -318,7 +318,9 @@
                 <select name="date_posted" class="filter-select">
                     <option value="">All Time</option>
                     <option value="today" {% if date_posted == "today" %}selected{% endif %}>Today</option>
+                    <option value="3days" {% if date_posted == "3days" %}selected{% endif %}>Past 3 Days</option>
                     <option value="week" {% if date_posted == "week" %}selected{% endif %}>This Week</option>
+                    <option value="2weeks" {% if date_posted == "2weeks" %}selected{% endif %}>Past 2 Weeks</option>
                     <option value="month" {% if date_posted == "month" %}selected{% endif %}>This Month</option>
                     <option value="not listed" {% if date_posted == "not listed" %}selected{% endif %}>Not Listed</option>
                 </select>
