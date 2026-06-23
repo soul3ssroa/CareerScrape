@@ -398,6 +398,35 @@ ASHBY_SITES = [
         'company': 'Plaid',
         'url': 'https://jobs.ashbyhq.com/plaid',
     },
+    {
+        'company': 'FluidStack',
+        'url': 'https://jobs.ashbyhq.com/fluidstack',
+    },
+    {
+        'company': 'Dave',
+        'url': 'https://jobs.ashbyhq.com/dave',
+    },
+    {
+        'company': 'Candid Health',
+        'url': 'https://jobs.ashbyhq.com/candidhealth',
+    },
+    {
+        'company': 'Outtake',
+        'url': 'https://jobs.ashbyhq.com/outtake',
+    },
+    {
+        'company': 'OneLeet',
+        'url': 'https://jobs.ashbyhq.com/oneleet',
+    },
+    {
+        'company': 'Saronic',
+        'url': 'https://jobs.ashbyhq.com/saronic',
+    },
+    {
+        'company': 'Cohere',
+        'url': 'https://jobs.ashbyhq.com/cohere',
+    },
+    
 ]
 
 JOBVITE_SITES = [
@@ -730,6 +759,42 @@ GREENHOUSE_SITES = [
     {
         'company': 'Muon Space',
         'url': 'https://job-boards.greenhouse.io/muonspace/',
+    },
+    {
+        'company': 'Armada',
+        'url': 'https://job-boards.greenhouse.io/armada',
+    },
+    {
+        'company': 'iCapital Network',
+        'url': 'https://job-boards.greenhouse.io/icapitalnetwork',
+    },
+    {
+        'company': 'Chaos Industries',
+        'url': 'https://job-boards.greenhouse.io/chaosindustries',
+    },
+    {
+        'company': 'xAI',
+        'url': 'https://job-boards.greenhouse.io/xai',
+    },
+    {
+        'company': 'Peregrine Technologies',
+        'url': 'https://job-boards.greenhouse.io/peregrinetechnologies',
+    },
+    {
+        'company': 'Defense Unicorns',
+        'url': 'https://job-boards.greenhouse.io/defenseunicorns',
+    },
+    {
+        'company': 'Hark',
+        'url': 'https://job-boards.greenhouse.io/hark',
+    },
+    {
+        'company': 'PhysicsX',
+        'url': 'https://job-boards.eu.greenhouse.io/physicsx',
+    },
+    {
+        'company': 'Fal',
+        'url': 'https://job-boards.greenhouse.io/fal',
     },
 ]
 

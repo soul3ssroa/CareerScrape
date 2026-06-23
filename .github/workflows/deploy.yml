@@ -1,4 +1,4 @@
-name: Deploy to Firebase / Cloud Run
+name: Deploy to Kubernetes
 
 on:
   push:
@@ -6,10 +6,8 @@ on:
       - main
 
 env:
-  PROJECT_ID: careerscrape
-  SERVICE_NAME: careerscrape
-  REGION: us-central1
-  IMAGE: gcr.io/careerscrape/careerscrape
+  REGISTRY: docker.io
+  IMAGE: joeg69/careerscrape
 
 jobs:
   deploy:
@@ -18,35 +16,61 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
+      - name: Build and push image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:${{ github.sha }}
+            ${{ env.IMAGE }}:latest
 
-      - name: Configure Docker for GCR
-        run: gcloud auth configure-docker --quiet
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
 
-      - name: Build and push Docker image
-        run: |
-          docker build -t $IMAGE:$GITHUB_SHA .
-          docker push $IMAGE:$GITHUB_SHA
-
-      - name: Deploy to Cloud Run
-        run: |
-          gcloud run deploy $SERVICE_NAME \
-            --image $IMAGE:$GITHUB_SHA \
-            --region $REGION \
-            --platform managed \
-            --allow-unauthenticated \
-            --set-env-vars="DEBUG=False,SECRET_KEY=${{ secrets.SECRET_KEY }},DATABASE_URL=${{ secrets.DATABASE_URL }},ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }},CSRF_TRUSTED_ORIGINS=${{ secrets.CSRF_TRUSTED_ORIGINS }}"
-
-      - name: Install Firebase CLI
-        run: npm install -g firebase-tools
-
-      - name: Deploy static files to Firebase Hosting
-        run: firebase deploy --only hosting --project $PROJECT_ID
+      - name: Configure kubeconfig
         env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+          KUBE_CONFIG_DATA: ${{ secrets.KUBECONFIG }}
+        run: |
+          mkdir -p ~/.kube
+          echo "$KUBE_CONFIG_DATA" > ~/.kube/config
+
+      - name: Update image tag in manifests
+        run: |
+          sed -i "s|joeg69/careerscrape:latest|${{ env.IMAGE }}:${{ github.sha }}|g" k8s/web-deployment.yaml
+          sed -i "s|joeg69/careerscrape:latest|${{ env.IMAGE }}:${{ github.sha }}|g" k8s/worker-deployment.yaml
+          sed -i "s|joeg69/careerscrape:latest|${{ env.IMAGE }}:${{ github.sha }}|g" k8s/migrate-job.yaml
+
+      - name: Apply configs and secrets
+        run: |
+          kubectl apply -f k8s/configmap.yaml
+          kubectl apply -f k8s/secret.yaml
+
+      - name: Apply storage and database
+        run: |
+          kubectl apply -f k8s/postgres-pvc.yaml
+          kubectl apply -f k8s/postgres.yaml
+
+      - name: Wait for Postgres
+        run: kubectl rollout status deployment/postgres --timeout=60s
+
+      - name: Run migrations
+        run: |
+          kubectl delete job careerscrape-migrate --ignore-not-found
+          kubectl apply -f k8s/migrate-job.yaml
+          kubectl wait --for=condition=complete job/careerscrape-migrate --timeout=120s
+
+      - name: Deploy web and worker
+        run: |
+          kubectl apply -f k8s/web-deployment.yaml
+          kubectl apply -f k8s/worker-deployment.yaml
+          kubectl rollout status deployment/careerscrape-web --timeout=120s
+
+      - name: Apply ingress
+        run: kubectl apply -f k8s/ingress.yaml

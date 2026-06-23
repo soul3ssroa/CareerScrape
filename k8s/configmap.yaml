@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: careerscrape-config
+  namespace: default
+data:
+  DEBUG: "False"
+  SECURE_SSL_REDIRECT: "False"
+  ALLOWED_HOSTS: "careerscrape.com,www.careerscrape.com,localhost,127.0.0.1"
+  CSRF_TRUSTED_ORIGINS: "https://careerscrape.com,https://www.careerscrape.com"
+  POSTGRES_DB: "scorched_search"
+  POSTGRES_HOST: "postgres-service"
+  POSTGRES_PORT: "5432"
+  POSTGRES_USER: "postgres"

@@ -10,3 +10,6 @@ dist/
 build/
 .venv/
 env/
+
+# Kubernetes secrets
+k8s/secret.yaml

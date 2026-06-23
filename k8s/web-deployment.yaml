@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: careerscrape-web
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: careerscrape-web
+  template:
+    metadata:
+      labels:
+        app: careerscrape-web
+    spec:
+      containers:
+        - name: web
+          image: joeg69/careerscrape:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: careerscrape-config
+            - secretRef:
+                name: careerscrape-secret
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 30
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: careerscrape-web-service
+  namespace: default
+spec:
+  selector:
+    app: careerscrape-web
+  ports:
+    - port: 80
+      targetPort: 8080

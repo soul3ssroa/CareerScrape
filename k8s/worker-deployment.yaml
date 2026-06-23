@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: careerscrape-worker
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: careerscrape-worker
+  template:
+    metadata:
+      labels:
+        app: careerscrape-worker
+    spec:
+      containers:
+        - name: worker
+          image: joeg69/careerscrape:latest
+          command: ["sh", "/code/jobscrape.sh"]
+          envFrom:
+            - configMapRef:
+                name: careerscrape-config
+            - secretRef:
+                name: careerscrape-secret
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+              cpu: "2000m"

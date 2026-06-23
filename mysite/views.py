@@ -96,8 +96,8 @@ def search_jobs(request):
         })
 
     words = query.split()
-    q_filter = Q(title__icontains=query) | Q(description__icontains=query)
-    for word in words:
+    q_filter = Q(title__icontains=words[0]) | Q(description__icontains=words[0])
+    for word in words[1:]:
         q_filter &= (Q(title__icontains=word) | Q(description__icontains=word))
     if company_filter:
         q_filter &= Q(company__iexact=company_filter)
