@@ -22,16 +22,3 @@ services:
         value: https://careerscrape.onrender.com,https://careerscrape.com,https://www.careerscrape.com
       - key: DATABASE_URL
         sync: false
-
-  - type: cron
-    name: careerscrape-scrape
-    env: python
-    plan: free
-    schedule: "0 * * * *"
-    buildCommand: |
-      pip install -r requirements.txt
-      python -m playwright install --with-deps chromium
-    startCommand: python manage.py scrape_jobs
-    envVars:
-      - key: DATABASE_URL
-        sync: false
