@@ -41,6 +41,11 @@ SESSION_COOKIE_SECURE = not DEBUG
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_SSL_REDIRECT = not DEBUG
 
+if not DEBUG:
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+
 
 # Application definition
 
@@ -170,7 +175,7 @@ WORKDAY_SITES = [
     },
     {
         'company': 'General Motors',
-        'url': 'https://generalmotors.wd5.myworkdayjobs.com/Careers_GM',
+        'url': 'https://generalmotors.wd5.myworkdayjobs.com/en-US/Careers_GM',
     },
     {
         'company': 'Boeing',

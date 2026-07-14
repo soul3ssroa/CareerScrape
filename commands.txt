@@ -31,3 +31,9 @@ Command to scrape jobs from a specific source
     python manage.py scrape_jobs --source workday
     python manage.py scrape_jobs --source jobvite
     python manage.py scrape_jobs --source greenhouse
+
+Command to continuously run
+
+    python manage.py migrate
+    python manage.py collectstatic --noinput
+    python manage.py scrape_jobs

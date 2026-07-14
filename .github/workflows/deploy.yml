@@ -1,4 +1,4 @@
-name: Deploy to Oracle Cloud
+name: Deploy to Render
 
 on:
   push:
@@ -10,15 +10,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy to Oracle VM
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: 163.192.122.208
-          username: ubuntu
-          key: ${{ secrets.ORACLE_SSH_KEY }}
-          script: |
-            cd ~/Careerscrape
-            git pull origin master
-            docker compose build
-            docker compose up -d
-            docker compose ps
+      - name: Trigger Render deploy
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$RENDER_DEPLOY_HOOK_URL" ]; then
+            echo "RENDER_DEPLOY_HOOK_URL secret is not set" >&2
+            exit 1
+          fi
+          curl -X POST "$RENDER_DEPLOY_HOOK_URL"

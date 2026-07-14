@@ -1,0 +1,37 @@
+services:
+  - type: web
+    name: careerscrape
+    env: python
+    plan: free
+    buildCommand: |
+      pip install -r requirements.txt
+      python -m playwright install --with-deps chromium
+      python manage.py collectstatic --noinput
+    startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 2 mysite.wsgi
+    healthCheckPath: /
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_HOSTS
+        value: careerscrape.onrender.com,careerscrape.com,www.careerscrape.com
+      - key: CSRF_TRUSTED_ORIGINS
+        value: https://careerscrape.onrender.com,https://careerscrape.com,https://www.careerscrape.com
+      - key: DATABASE_URL
+        sync: false
+
+  - type: cron
+    name: careerscrape-scrape
+    env: python
+    plan: free
+    schedule: "0 * * * *"
+    buildCommand: |
+      pip install -r requirements.txt
+      python -m playwright install --with-deps chromium
+    startCommand: python manage.py scrape_jobs
+    envVars:
+      - key: DATABASE_URL
+        sync: false
