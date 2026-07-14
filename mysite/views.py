@@ -6,7 +6,7 @@ from django.core.paginator import Paginator
 from datetime import date, timedelta
 
 from jobs.models import Job
-from jobs.utils import get_location_from_workday_url, location_matches_filter, parse_posted_date
+from jobs.utils import get_location_from_workday_url, parse_posted_date
 
 logger = logging.getLogger(__name__)
 
@@ -14,12 +14,6 @@ logger = logging.getLogger(__name__)
 def get_job_location_posting(job):
     return job.location or get_location_from_workday_url(job.url)
 
-
-def job_matches_location_filter(job, location_filter):
-    return (
-        location_matches_filter(job.location, location_filter)
-        or location_matches_filter(get_location_from_workday_url(job.url), location_filter)
-    )
 
 
 def add_job_display_fields(jobs):
@@ -96,8 +90,13 @@ def search_jobs(request):
         q_filter &= Q(posted_date__gte=today - timedelta(days=30))
     elif date_posted == 'not listed':
         q_filter &= Q(posted_date__isnull=True)
-    elif not date_posted:
-        q_filter &= Q(posted_date__isnull=False)
+
+    if location_filter:
+        q_filter &= Q(location__icontains=location_filter) | Q(url__icontains=location_filter)
+
+    if exclude_tags:
+        for tag in exclude_tags:
+            q_filter &= ~Q(title__icontains=tag) & ~Q(description__icontains=tag)
 
     try:
         jobs = Job.objects.filter(q_filter).order_by('-posted_date', '-last_seen')
@@ -109,14 +108,7 @@ def search_jobs(request):
             'companies': _all_companies(),
         })
 
-    all_jobs = [
-        job for job in jobs.only('title', 'company', 'location', 'url', 'posted_date', 'description').iterator(chunk_size=200)
-        if job_matches_location_filter(job, location_filter)
-        and not any(
-            tag.lower() in job.title.lower() or tag.lower() in (job.description or '').lower()
-            for tag in exclude_tags
-        )
-    ]
+    all_jobs = list(jobs.only('title', 'company', 'location', 'url', 'posted_date', 'description')[:500])
 
     paginator = Paginator(all_jobs, 30)
     page_number = request.GET.get('page', 1)
