@@ -37,3 +37,5 @@ Command to continuously run
     python manage.py migrate
     python manage.py collectstatic --noinput
     python manage.py scrape_jobs
+
+end
