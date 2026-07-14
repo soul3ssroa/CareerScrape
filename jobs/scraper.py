@@ -157,11 +157,11 @@ def _save_job(job_data):
     job, created = Job.objects.update_or_create(
         url=job_data['url'],
         defaults={
-            'title': job_data['title'],
+            'title': job_data['title'] or 'Unknown Title',
             'company': job_data['company'],
-            'location': job_data['location'],
+            'location': job_data['location'] or '',
             'posted_date': posted_date,
-            'description': job_data['description'],
+            'description': job_data['description'] or '',
             'source': 'workday',
         },
     )
@@ -439,11 +439,11 @@ def _save_job_source(job_data, source):
     job, _ = Job.objects.update_or_create(
         url=job_data['url'],
         defaults={
-            'title': job_data['title'],
+            'title': job_data['title'] or 'Unknown Title',
             'company': job_data['company'],
-            'location': job_data['location'],
+            'location': job_data['location'] or '',
             'posted_date': posted_date,
-            'description': job_data['description'],
+            'description': job_data['description'] or '',
             'source': source,
         },
     )
