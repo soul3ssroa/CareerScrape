@@ -90,6 +90,8 @@ def search_jobs(request):
         q_filter &= Q(posted_date__gte=today - timedelta(days=30))
     elif date_posted == 'not listed':
         q_filter &= Q(posted_date__isnull=True)
+    else:
+        q_filter &= Q(posted_date__isnull=False)
 
     if location_filter:
         q_filter &= Q(location__icontains=location_filter) | Q(url__icontains=location_filter)
