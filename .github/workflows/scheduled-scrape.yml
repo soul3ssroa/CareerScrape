@@ -30,3 +30,4 @@ jobs:
           DEBUG: 'False'
         run: |
           python manage.py scrape_jobs
+          python manage.py cleanup_jobs --duplicates --older-than-days 30
