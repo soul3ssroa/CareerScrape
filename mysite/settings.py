@@ -281,7 +281,7 @@ WORKDAY_SITES = [
     },
     {
         'company': 'Magna',
-        'url': 'https://wd3.myworkdaysite.com/recruiting/magna/Magna'
+        'url': 'https://magna.wd3.myworkdayjobs.com/en-US/magna_careers'
     },
     {
         'company': 'Boston Dynamics',

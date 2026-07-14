@@ -1,3 +1,4 @@
+import os
 import re
 import json
 import time
@@ -370,7 +371,17 @@ def _build_chrome_driver():
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
     options.add_argument('--window-size=1920,1080')
-    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
+
+    chrome_binary = os.environ.get('CHROME_BINARY_PATH')
+    chromedriver_path = os.environ.get('CHROMEDRIVER_PATH')
+
+    if chrome_binary:
+        options.binary_location = chrome_binary
+    if chromedriver_path:
+        driver = webdriver.Chrome(service=ChromeService(chromedriver_path), options=options)
+    else:
+        driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
+
     driver.set_page_load_timeout(30)
     driver.set_script_timeout(30)
     return driver
