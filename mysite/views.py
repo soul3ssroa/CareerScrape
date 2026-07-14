@@ -22,28 +22,6 @@ def job_matches_location_filter(job, location_filter):
     )
 
 
-def job_matches_date_filter(job, date_posted, today):
-    if not date_posted:
-        d = job.posted_date or parse_posted_date(job.description)
-        return d is not None
-    d = job.posted_date or parse_posted_date(job.description)
-    if date_posted == 'not listed':
-        return d is None
-    if d is None:
-        return False
-    if date_posted == '3days':
-        return d >= today - timedelta(days=3)
-    if date_posted == 'today':
-        return d >= today
-    if date_posted == 'week':
-        return d >= today - timedelta(days=7)
-    if date_posted == '2weeks':
-        return d >= today - timedelta(days=14)
-    if date_posted == 'month':
-        return d >= today - timedelta(days=30)
-    return True
-
-
 def add_job_display_fields(jobs):
     for job in jobs:
         job.location_posting = get_job_location_posting(job)
@@ -105,6 +83,22 @@ def search_jobs(request):
     if company_filter:
         q_filter &= Q(company__iexact=company_filter)
 
+    today = date.today()
+    if date_posted == 'today':
+        q_filter &= Q(posted_date__gte=today)
+    elif date_posted == '3days':
+        q_filter &= Q(posted_date__gte=today - timedelta(days=3))
+    elif date_posted == 'week':
+        q_filter &= Q(posted_date__gte=today - timedelta(days=7))
+    elif date_posted == '2weeks':
+        q_filter &= Q(posted_date__gte=today - timedelta(days=14))
+    elif date_posted == 'month':
+        q_filter &= Q(posted_date__gte=today - timedelta(days=30))
+    elif date_posted == 'not listed':
+        q_filter &= Q(posted_date__isnull=True)
+    elif not date_posted:
+        q_filter &= Q(posted_date__isnull=False)
+
     try:
         jobs = Job.objects.filter(q_filter).order_by('-posted_date', '-last_seen')
         list(jobs[:1])  # test DB connection early
@@ -115,11 +109,9 @@ def search_jobs(request):
             'companies': _all_companies(),
         })
 
-    today = date.today()
     all_jobs = [
-        job for job in jobs.iterator()
+        job for job in jobs.only('title', 'company', 'location', 'url', 'posted_date', 'description').iterator(chunk_size=200)
         if job_matches_location_filter(job, location_filter)
-        and job_matches_date_filter(job, date_posted, today)
         and not any(
             tag.lower() in job.title.lower() or tag.lower() in (job.description or '').lower()
             for tag in exclude_tags
