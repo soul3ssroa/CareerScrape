@@ -17,8 +17,8 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: ALLOWED_HOSTS
-        value: careerscrape.onrender.com,careerscrape.com,www.careerscrape.com
+        value: careerscrape.com,www.careerscrape.com,careerscrape.onrender.com
       - key: CSRF_TRUSTED_ORIGINS
-        value: https://careerscrape.onrender.com,https://careerscrape.com,https://www.careerscrape.com
+        value: https://careerscrape.com,https://www.careerscrape.com,https://careerscrape.onrender.com
       - key: DATABASE_URL
         sync: false
