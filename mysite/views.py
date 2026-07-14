@@ -1,3 +1,4 @@
+import logging
 from django.shortcuts import render, redirect
 from django.db.models import Q
 from django.conf import settings
@@ -6,6 +7,8 @@ from datetime import date, timedelta
 
 from jobs.models import Job
 from jobs.utils import get_location_from_workday_url, location_matches_filter, parse_posted_date
+
+logger = logging.getLogger(__name__)
 
 
 def get_job_location_posting(job):
@@ -102,7 +105,15 @@ def search_jobs(request):
     if company_filter:
         q_filter &= Q(company__iexact=company_filter)
 
-    jobs = Job.objects.filter(q_filter).order_by('-posted_date', '-last_seen')
+    try:
+        jobs = Job.objects.filter(q_filter).order_by('-posted_date', '-last_seen')
+        list(jobs[:1])  # test DB connection early
+    except Exception as e:
+        logger.exception('Database error during job search: %s', e)
+        return render(request, 'index.html', {
+            'error': 'A database error occurred. Please try again later.',
+            'companies': _all_companies(),
+        })
 
     today = date.today()
     all_jobs = [

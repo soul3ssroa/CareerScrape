@@ -94,13 +94,21 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 
 database_url = os.environ.get('DATABASE_URL', '').strip()
 if database_url:
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=database_url,
-            conn_max_age=600,
-            conn_health_checks=True,
-        )
-    }
+    try:
+        DATABASES = {
+            'default': dj_database_url.config(
+                default=database_url,
+                conn_max_age=600,
+                conn_health_checks=True,
+            )
+        }
+    except Exception:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'db.sqlite3',
+            }
+        }
 elif os.environ.get('POSTGRES_DB') or os.environ.get('POSTGRES_HOST'):
     DATABASES = {
         'default': {
@@ -157,6 +165,22 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {'class': 'logging.StreamHandler'},
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'WARNING',
+    },
+    'loggers': {
+        'django': {'handlers': ['console'], 'level': 'WARNING', 'propagate': False},
+        'mysite': {'handlers': ['console'], 'level': 'DEBUG', 'propagate': False},
+    },
+}
 
 WORKDAY_SITES = [
     {
