@@ -5,6 +5,49 @@ from urllib.parse import unquote
 from django.utils import timezone
 
 
+COUNTRY_CHOICES = [
+    'United States',
+    'Canada',
+    'United Kingdom',
+    'Australia',
+    'Germany',
+    'France',
+    'Netherlands',
+    'Ireland',
+    'India',
+    'Japan',
+    'China',
+    'South Korea',
+    'Brazil',
+    'Mexico',
+    'Spain',
+    'Italy',
+    'Poland',
+    'Switzerland',
+    'Sweden',
+    'Belgium',
+    'Argentina',
+    'Russia',
+    'Turkey',
+    'Saudi Arabia',
+    'Indonesia',
+    'Taiwan',
+    'Remote',
+]
+
+US_STATE_CHOICES = [
+    'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado',
+    'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho',
+    'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine',
+    'Maryland', 'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi',
+    'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey',
+    'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio',
+    'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina',
+    'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia',
+    'Washington', 'West Virginia', 'Wisconsin', 'Wyoming',
+]
+
+
 # Maps each country key to the set of tokens/phrases that identify it.
 # Short entries (<=3 chars) are matched as whole uppercase tokens.
 # Longer entries are matched as substrings in the normalized location text.
@@ -12,7 +55,7 @@ COUNTRY_INDICATORS = {
     'united states': {
         'tokens': {'US', 'USA'},
         'phrases': {
-            'united states', 'united states of america', 'america',
+            'united states', 'united states of america',
             # state names
             'alabama', 'alaska', 'arizona', 'arkansas', 'california', 'colorado',
             'connecticut', 'delaware', 'florida', 'georgia', 'hawaii', 'idaho',
@@ -68,6 +111,26 @@ COUNTRY_INDICATORS = {
     'belgium': {'tokens': {'BE', 'BEL'}, 'phrases': {'belgium'}, 'state_codes': set()},
     'ireland': {'tokens': {'IE', 'IRL'}, 'phrases': {'ireland'}, 'state_codes': set()},
     'argentina': {'tokens': {'AR', 'ARG'}, 'phrases': {'argentina'}, 'state_codes': set()},
+    'sweden': {'tokens': {'SE', 'SWE'}, 'phrases': {'sweden'}, 'state_codes': set()},
+}
+
+
+# Job boards do not always provide a state or country with a city.  These are
+# common US city names that are unambiguous enough to classify on their own.
+# State names/codes above continue to cover every city whose listing includes
+# the usual ", ST" or ", State" suffix.
+US_CITY_INDICATORS = {
+    'albuquerque', 'anaheim', 'arlington', 'atlanta', 'austin', 'baltimore',
+    'boston', 'charlotte', 'chicago', 'cleveland', 'colorado springs',
+    'columbus', 'dallas', 'denver', 'detroit', 'el paso', 'fort worth',
+    'fresno', 'grand rapids', 'honolulu', 'houston', 'indianapolis',
+    'jacksonville', 'kansas city', 'las vegas', 'long beach', 'los angeles',
+    'louisville', 'memphis', 'mesa', 'miami', 'milwaukee', 'minneapolis',
+    'nashville', 'new orleans', 'new york city', 'oakland', 'oklahoma city',
+    'omaha', 'orlando', 'philadelphia', 'phoenix', 'portland', 'raleigh',
+    'sacramento', 'san antonio', 'san diego', 'san francisco', 'san fransisco',
+    'san jose',
+    'seattle', 'tampa', 'tucson', 'tulsa', 'virginia beach', 'washington dc',
 }
 
 
@@ -88,12 +151,18 @@ def _get_country_keys(location):
     # but the same code appearing later (e.g. 'Austin, TX') is a US state.
     trailing_upper = {t.upper() for t in all_tokens[1:]} if len(all_tokens) > 1 else set()
 
-    matched = set()
+    # Explicit country codes take precedence over US state codes.  This keeps
+    # "Remote - DE" (Germany) from being mistaken for Delaware, while
+    # "Austin, TX" still resolves through the state-code pass below.
+    matched = {
+        country
+        for country, indicators in COUNTRY_INDICATORS.items()
+        if upper_tokens & indicators['tokens']
+    }
+    if matched:
+        return matched
+
     for country, indicators in COUNTRY_INDICATORS.items():
-        # Check short tokens (US/USA, country ISO codes)
-        if upper_tokens & indicators['tokens']:
-            matched.add(country)
-            continue
         # Check state codes only in non-leading position
         if indicators['state_codes'] and trailing_upper & indicators['state_codes']:
             matched.add(country)
@@ -167,6 +236,9 @@ def _location_contains_any_us_indicator(location):
     for phrase in us_ind['phrases']:
         if f' {phrase} ' in padded:
             return True
+    for city in US_CITY_INDICATORS:
+        if f' {city} ' in padded:
+            return True
     return False
 
 
@@ -183,6 +255,9 @@ def location_matches_filter(location, location_filter):
         return True
     if not location:
         return False
+
+    if location_filter.strip().casefold() == 'remote':
+        return is_remote(location)
 
     kind, value = _resolve_filter(location_filter)
 
@@ -229,6 +304,33 @@ def get_location_from_workday_url(url):
             cleaned_parts.append(cleaned)
 
     return ', '.join(cleaned_parts)
+
+
+def is_remote(location):
+    if not location:
+        return False
+    loc = location.lower()
+    return bool(re.search(r'\bremote\b', loc))
+
+
+def resolve_country(location):
+    """Return the canonical country name for a location string, or None."""
+    if not location:
+        return None
+    keys = _get_country_keys(location)
+    if keys:
+        # A remote posting with a country qualifier (for example, "Remote - US")
+        # belongs in that country, while an unqualified remote posting remains
+        # available through the Remote option.
+        for choice in COUNTRY_CHOICES:
+            if choice.lower() in keys:
+                return choice
+        return next(iter(keys)).title()
+    if is_remote(location):
+        return 'Remote'
+    if _location_contains_any_us_indicator(location):
+        return 'United States'
+    return None
 
 
 def parse_posted_date(text):

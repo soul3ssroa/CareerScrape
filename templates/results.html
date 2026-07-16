@@ -101,8 +101,6 @@
             outline: none;
         }
 
-        .location-input::placeholder { color: #757575; }
-
         .btn-search {
             width: 112px;
             height: 49px;
@@ -305,7 +303,17 @@
             <div class="search-row">
                 <input type="text" name="query" value="{{ query }}" placeholder="Search for job..." class="search-input" />
                 <button type="submit" class="btn-search">Search</button>
-                <input type="text" name="location" value="{{ location_filter }}" placeholder="Location..." class="location-input" />
+                <select name="location" class="location-input">
+                    <option value="">All Countries</option>
+                    {% for country in countries %}
+                        <option value="{{ country }}" {% if country == location_filter %}selected{% endif %}>{{ country }}</option>
+                    {% endfor %}
+                    <optgroup label="United States">
+                        {% for state in states %}
+                            <option value="{{ state }}" {% if state == location_filter %}selected{% endif %}>{{ state }}</option>
+                        {% endfor %}
+                    </optgroup>
+                </select>
             </div>
 
             <div class="filters-row" style="margin-top: 8px;">

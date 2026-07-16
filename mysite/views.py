@@ -6,7 +6,13 @@ from django.core.paginator import Paginator
 from datetime import date, timedelta
 
 from jobs.models import Job
-from jobs.utils import get_location_from_workday_url, parse_posted_date
+from jobs.utils import (
+    COUNTRY_CHOICES,
+    US_STATE_CHOICES,
+    get_location_from_workday_url,
+    location_matches_filter,
+    parse_posted_date,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -42,8 +48,16 @@ def _all_companies():
     return sorted(companies)
 
 
+def _filter_options():
+    return {
+        'companies': _all_companies(),
+        'countries': COUNTRY_CHOICES,
+        'states': US_STATE_CHOICES,
+    }
+
+
 def home(request):
-    return render(request, 'index.html', {'companies': _all_companies()})
+    return render(request, 'index.html', _filter_options())
 
 
 def search_jobs(request):
@@ -67,13 +81,22 @@ def search_jobs(request):
             'company_filter': company_filter,
             'date_posted': date_posted,
             'exclude_tags': params.get('exclude_tags', ''),
-            'companies': _all_companies(),
+            **_filter_options(),
         })
 
     words = query.split()
-    q_filter = Q(title__icontains=words[0]) | Q(description__icontains=words[0])
+
+    def keyword_filter(word):
+        return (
+            Q(title__icontains=word)
+            | Q(description__icontains=word)
+            | Q(location__icontains=word)
+            | Q(url__icontains=word)
+        )
+
+    q_filter = keyword_filter(words[0])
     for word in words[1:]:
-        q_filter &= (Q(title__icontains=word) | Q(description__icontains=word))
+        q_filter &= keyword_filter(word)
     if company_filter:
         q_filter &= Q(company__iexact=company_filter)
 
@@ -93,9 +116,6 @@ def search_jobs(request):
     else:
         q_filter &= Q(posted_date__isnull=False)
 
-    if location_filter:
-        q_filter &= Q(location__icontains=location_filter) | Q(url__icontains=location_filter)
-
     if exclude_tags:
         for tag in exclude_tags:
             q_filter &= ~Q(title__icontains=tag) & ~Q(description__icontains=tag)
@@ -107,10 +127,18 @@ def search_jobs(request):
         logger.exception('Database error during job search: %s', e)
         return render(request, 'index.html', {
             'error': 'A database error occurred. Please try again later.',
-            'companies': _all_companies(),
+            **_filter_options(),
         })
 
-    all_jobs = list(jobs.only('title', 'company', 'location', 'url', 'posted_date', 'description')[:500])
+    all_jobs = list(jobs.only('title', 'company', 'location', 'url', 'posted_date', 'description'))
+
+    if location_filter:
+        all_jobs = [
+            job for job in all_jobs
+            if location_matches_filter(
+                job.location or get_location_from_workday_url(job.url), location_filter
+            )
+        ]
 
     paginator = Paginator(all_jobs, 30)
     page_number = request.GET.get('page', 1)
@@ -124,5 +152,5 @@ def search_jobs(request):
         'company_filter': company_filter,
         'date_posted': date_posted,
         'exclude_tags': params.get('exclude_tags', ''),
-        'companies': _all_companies(),
+        **_filter_options(),
     })

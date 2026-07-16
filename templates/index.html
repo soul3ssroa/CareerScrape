@@ -251,7 +251,17 @@
             </div>
 
             <div class="block-filters">
-                <input type="text" name="location" value="{{ location_filter }}" placeholder="Location (e.g. United States, TX, Remote)" class="filter-input input-location" />
+                <select name="location" class="filter-input input-location">
+                    <option value="">All Countries</option>
+                    {% for country in countries %}
+                        <option value="{{ country }}" {% if country == location_filter %}selected{% endif %}>{{ country }}</option>
+                    {% endfor %}
+                    <optgroup label="United States">
+                        {% for state in states %}
+                            <option value="{{ state }}" {% if state == location_filter %}selected{% endif %}>{{ state }}</option>
+                        {% endfor %}
+                    </optgroup>
+                </select>
                 <select name="company" class="filter-input select-company">
                     <option value="">All Companies</option>
                     {% for company in companies %}

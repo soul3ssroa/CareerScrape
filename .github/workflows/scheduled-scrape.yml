@@ -36,5 +36,15 @@ jobs:
           CHROMEDRIVER_PATH: /usr/bin/chromedriver
           CHROME_BINARY_PATH: /usr/bin/chromium-browser
         run: |
-          python manage.py scrape_jobs
+          python manage.py scrape_jobs --source jobvite
+          python manage.py cleanup_jobs --duplicates --older-than-days 30
+          python manage.py scrape_jobs --source greenhouse
+          python manage.py cleanup_jobs --duplicates --older-than-days 30
+          python manage.py scrape_jobs --source lever
+          python manage.py cleanup_jobs --duplicates --older-than-days 30
+          python manage.py scrape_jobs --source ashby
+          python manage.py cleanup_jobs --duplicates --older-than-days 30
+          python manage.py scrape_jobs --source apply
+          python manage.py cleanup_jobs --duplicates --older-than-days 30
+          python manage.py scrape_jobs --source workday
           python manage.py cleanup_jobs --duplicates --older-than-days 30
