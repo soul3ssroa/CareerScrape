@@ -21,7 +21,6 @@ def get_job_location_posting(job):
     return job.location or get_location_from_workday_url(job.url)
 
 
-
 def add_job_display_fields(jobs):
     for job in jobs:
         job.location_posting = get_job_location_posting(job)
@@ -97,6 +96,7 @@ def search_jobs(request):
     q_filter = keyword_filter(words[0])
     for word in words[1:]:
         q_filter &= keyword_filter(word)
+
     if company_filter:
         q_filter &= Q(company__iexact=company_filter)
 
@@ -113,8 +113,6 @@ def search_jobs(request):
         q_filter &= Q(posted_date__gte=today - timedelta(days=30))
     elif date_posted == 'not listed':
         q_filter &= Q(posted_date__isnull=True)
-    else:
-        q_filter &= Q(posted_date__isnull=False)
 
     if exclude_tags:
         for tag in exclude_tags:
@@ -122,11 +120,12 @@ def search_jobs(request):
 
     try:
         jobs = Job.objects.filter(q_filter).order_by('-posted_date', '-last_seen')
-        list(jobs[:1])  # test DB connection early
+        total = jobs.count()
+        logger.warning('Search "%s" matched %d jobs before location filter', query, total)
     except Exception as e:
         logger.exception('Database error during job search: %s', e)
         return render(request, 'index.html', {
-            'error': 'A database error occurred. Please try again later.',
+            'error': f'Database error: {e}',
             **_filter_options(),
         })
 
