@@ -113,6 +113,8 @@ def search_jobs(request):
         q_filter &= Q(posted_date__gte=today - timedelta(days=30))
     elif date_posted == 'not listed':
         q_filter &= Q(posted_date__isnull=True)
+    else:
+        q_filter &= Q(posted_date__isnull=False)
 
     if exclude_tags:
         for tag in exclude_tags:
