@@ -18,4 +18,4 @@ jobs:
             echo "RENDER_DEPLOY_HOOK_URL secret is not set" >&2
             exit 1
           fi
-          curl -X POST "$RENDER_DEPLOY_HOOK_URL"
+          curl -X POST "$RENDER_DEPLOY_HOOK_URL&clearCache=true"
