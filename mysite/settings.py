@@ -204,6 +204,10 @@ WORKDAY_SITES = [
         'url': 'https://generalmotors.wd5.myworkdayjobs.com/en-US/Careers_GM',
     },
     {
+        'company': 'Baker Hughes',
+        'url': 'https://bakerhughes.wd5.myworkdayjobs.com/en-US/BakerHughes',
+    },
+    {
         'company': 'Boeing',
         'url': 'https://boeing.wd1.myworkdayjobs.com/EXTERNAL_CAREERS',
     },
