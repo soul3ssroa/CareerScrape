@@ -208,6 +208,10 @@ WORKDAY_SITES = [
         'url': 'https://bakerhughes.wd5.myworkdayjobs.com/en-US/BakerHughes',
     },
     {
+        'company': 'Target',
+        'url': 'https://target.wd5.myworkdayjobs.com/en-US/targetcareers',
+    },
+    {
         'company': 'Boeing',
         'url': 'https://boeing.wd1.myworkdayjobs.com/EXTERNAL_CAREERS',
     },
@@ -485,6 +489,10 @@ ORACLECLOUD_SITES = [
         'url': 'https://apply.ford.com/en/sites/CX_1/jobs'
     },
     {
+        'company': 'Verisk',
+        'url': 'https://fa-ewmy-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/jobs'
+    },
+    {
         'company': 'TTI (Oracle)',
         'url': 'https://fa-exty-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/jobs'
     },
@@ -501,6 +509,8 @@ ORACLECLOUD_SITES = [
         'url': 'https://ibqbjb.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/Honeywell/jobs'
     },
 ]
+
+APPLY_SITES = ORACLECLOUD_SITES
 
 GREENHOUSE_SITES = [
     {
@@ -654,6 +664,10 @@ GREENHOUSE_SITES = [
     {
         'company': 'Together AI',
         'url': 'https://job-boards.greenhouse.io/togetherai',
+    },
+    {
+        'company': 'Relativity Space',
+        'url': 'https://job-boards.greenhouse.io/relativity',
     },
     {
         'company': 'SHEIN',
