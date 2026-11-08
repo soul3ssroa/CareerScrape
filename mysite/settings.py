@@ -335,6 +335,14 @@ WORKDAY_SITES = [
         'company': 'TTI',
         'url': 'https://tti.wd1.myworkdayjobs.com/en-US/Milwaukee'
     },
+    {
+        'company': 'Duke Energy',
+        'url': 'https://dukeenergy.wd1.myworkdayjobs.com/en-US/Search',
+    },
+    {
+        'company': 'Itron',
+        'url': 'https://itron.wd5.myworkdayjobs.com/en-US/Itron',
+    },
 ]
 
 LEVER_SITES = [
